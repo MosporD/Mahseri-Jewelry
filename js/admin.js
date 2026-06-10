@@ -1,0 +1,217 @@
+/* ============================================================
+   Mahseri Jewellery — catalogue manager (admin.html)
+   Edits are saved to localStorage and override js/data.js in
+   this browser. "Download data.js" exports the full catalogue
+   so the file can be replaced on the host for all visitors.
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "mahseri_products_admin_v1";
+  var SESSION_KEY = "mahseri_admin_session";
+  /* NOTE: this passcode only deters casual visitors. Anyone who reads the
+     page source can see it — real protection requires a server. Change it
+     to your own value before publishing. */
+  var PASSCODE = "mahseri2026";
+
+  var products = MAHSERI_PRODUCTS.slice();
+  var editingId = null;
+
+  function $(sel) { return document.querySelector(sel); }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  /* ---------- Gate ---------- */
+
+  function initGate() {
+    if (sessionStorage.getItem(SESSION_KEY) === "ok") {
+      $("#admin-app").style.display = "";
+      render();
+      return;
+    }
+    $("#admin-gate").style.display = "";
+    function tryEnter() {
+      if ($("#gate-pass").value === PASSCODE) {
+        sessionStorage.setItem(SESSION_KEY, "ok");
+        $("#admin-gate").style.display = "none";
+        $("#admin-app").style.display = "";
+        render();
+      } else {
+        $("#gate-error").textContent = "Incorrect passcode.";
+      }
+    }
+    $("#gate-enter").addEventListener("click", tryEnter);
+    $("#gate-pass").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") tryEnter();
+    });
+  }
+
+  /* ---------- Persistence ---------- */
+
+  function persist() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  }
+
+  /* ---------- Table ---------- */
+
+  function render() {
+    var rows = products.map(function (p) {
+      return (
+        '<tr data-id="' + esc(p.id) + '">' +
+        "<td><strong>" + esc(p.name) + "</strong>" +
+        (p.badge ? ' <span class="pill">' + esc(p.badge) + "</span>" : "") + "</td>" +
+        "<td>" + esc(p.category) + "</td>" +
+        "<td>" + esc(p.material) + "</td>" +
+        "<td>" + esc(p.price) + " JOD</td>" +
+        '<td class="row-actions">' +
+        '<button type="button" data-act="edit">Edit</button> ' +
+        '<button type="button" data-act="delete" class="danger">Delete</button>' +
+        "</td></tr>"
+      );
+    }).join("");
+    $("#product-rows").innerHTML =
+      rows || '<tr><td colspan="5" style="opacity:0.6">No pieces yet — add your first one.</td></tr>';
+  }
+
+  function startEdit(id) {
+    var p = products.find(function (x) { return x.id === id; });
+    if (!p) return;
+    editingId = id;
+    $("#form-title").textContent = "Edit: " + p.name;
+    $("#btn-save").textContent = "Save changes";
+    $("#btn-cancel").style.display = "";
+    $("#f-name").value = p.name;
+    $("#f-category").value = p.category;
+    $("#f-material").value = p.material;
+    $("#f-price").value = p.price;
+    $("#f-weight").value = p.weight;
+    $("#f-badge").value = p.badge || "";
+    $("#f-art").value = p.art || "ring";
+    $("#f-desc").value = p.description;
+    $("#f-name").focus();
+  }
+
+  function resetForm() {
+    editingId = null;
+    $("#product-form").reset();
+    $("#form-title").textContent = "Add a new piece";
+    $("#btn-save").textContent = "Add piece";
+    $("#btn-cancel").style.display = "none";
+  }
+
+  function slugify(name) {
+    var base = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "piece";
+    var slug = base, n = 2;
+    while (products.some(function (p) { return p.id === slug; })) {
+      slug = base + "-" + n++;
+    }
+    return slug;
+  }
+
+  /* ---------- Export ---------- */
+
+  function buildDataJs() {
+    var loader =
+      "/* Products edited via admin.html are stored in this browser's localStorage\n" +
+      "   and override the catalogue above. Use \"Download data.js\" in the admin\n" +
+      "   page and replace this file on your host to publish for all visitors. */\n" +
+      "(function () {\n" +
+      "  try {\n" +
+      '    var saved = localStorage.getItem("' + STORAGE_KEY + '");\n' +
+      "    if (saved) {\n" +
+      "      var arr = JSON.parse(saved);\n" +
+      "      if (Array.isArray(arr) && arr.length) {\n" +
+      "        MAHSERI_PRODUCTS.length = 0;\n" +
+      "        arr.forEach(function (p) { MAHSERI_PRODUCTS.push(p); });\n" +
+      "      }\n" +
+      "    }\n" +
+      "  } catch (e) { /* ignore corrupt saved data */ }\n" +
+      "})();\n";
+
+    return (
+      "/* Mahseri Jewellery — product catalogue\n" +
+      "   Prices in Jordanian Dinar (JOD). Art keys map to SVG line art in app.js.\n" +
+      "   Generated by the catalogue manager on " + new Date().toLocaleString() + " */\n\n" +
+      "const MAHSERI_PRODUCTS = " + JSON.stringify(products, null, 2) + ";\n\n" +
+      "const MAHSERI_STORE = " + JSON.stringify(MAHSERI_STORE, null, 2) + ";\n\n" +
+      "/* Order notifications — fill in your keys and set enabled: true.\n" +
+      "   Full setup steps are in SETUP-GUIDE.md at the project root. */\n" +
+      "const MAHSERI_NOTIFY = " + JSON.stringify(MAHSERI_NOTIFY, null, 2) + ";\n\n" +
+      loader
+    );
+  }
+
+  function download() {
+    var blob = new Blob([buildDataJs()], { type: "text/javascript" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "data.js";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  }
+
+  /* ---------- Events ---------- */
+
+  document.addEventListener("DOMContentLoaded", function () {
+    initGate();
+
+    $("#product-rows").addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-act]");
+      if (!btn) return;
+      var id = btn.closest("tr").getAttribute("data-id");
+      if (btn.getAttribute("data-act") === "edit") startEdit(id);
+      if (btn.getAttribute("data-act") === "delete") {
+        var p = products.find(function (x) { return x.id === id; });
+        if (p && confirm('Delete "' + p.name + '" from the catalogue?')) {
+          products = products.filter(function (x) { return x.id !== id; });
+          if (editingId === id) resetForm();
+          persist();
+          render();
+        }
+      }
+    });
+
+    $("#product-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var entry = {
+        id: editingId || slugify($("#f-name").value),
+        name: $("#f-name").value.trim(),
+        category: $("#f-category").value,
+        material: $("#f-material").value,
+        price: Math.max(1, Math.round(Number($("#f-price").value) || 0)),
+        weight: $("#f-weight").value.trim(),
+        badge: $("#f-badge").value || null,
+        art: $("#f-art").value,
+        description: $("#f-desc").value.trim()
+      };
+      if (!entry.name || !entry.price) return;
+
+      if (editingId) {
+        var i = products.findIndex(function (x) { return x.id === editingId; });
+        if (i > -1) products[i] = entry;
+      } else {
+        products.push(entry);
+      }
+      persist();
+      render();
+      resetForm();
+    });
+
+    $("#btn-cancel").addEventListener("click", resetForm);
+    $("#btn-export").addEventListener("click", download);
+
+    $("#btn-reset").addEventListener("click", function () {
+      if (confirm("Discard all changes made in this browser and restore the original catalogue from data.js?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    });
+  });
+})();

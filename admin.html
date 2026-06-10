@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Catalogue Manager | Mahseri Jewellery</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
+    .admin-head { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .admin-head h1 { font-size: 2rem; margin: 0; }
+    .admin-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .admin-note { background: rgba(198,163,92,0.12); border: 1px solid rgba(198,163,92,0.4); border-radius: 8px; padding: 0.85rem 1.1rem; font-size: 0.86rem; line-height: 1.5; margin-bottom: 1.75rem; }
+    .admin-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem; align-items: start; }
+    @media (max-width: 880px) { .admin-grid { grid-template-columns: 1fr; } }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .admin-table th, .admin-table td { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 1px solid rgba(0,0,0,0.08); vertical-align: middle; }
+    .admin-table th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.65; }
+    .admin-table .row-actions { white-space: nowrap; text-align: right; }
+    .admin-table button { font: inherit; font-size: 0.78rem; padding: 0.3rem 0.7rem; border-radius: 6px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }
+    .admin-table button:hover { border-color: #c6a35c; color: #8a6c33; }
+    .admin-table button.danger:hover { border-color: #c0392b; color: #c0392b; }
+    .admin-form { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.5rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); position: sticky; top: 1rem; }
+    .admin-form h2 { font-size: 1.3rem; margin: 0 0 1rem; }
+    .admin-form .field { margin-bottom: 0.9rem; }
+    .admin-form label { display: block; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.3rem; opacity: 0.7; }
+    .admin-form input, .admin-form select, .admin-form textarea { width: 100%; font: inherit; font-size: 0.9rem; padding: 0.55rem 0.7rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 7px; background: #fff; box-sizing: border-box; }
+    .admin-form .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .admin-form .form-actions { display: flex; gap: 0.6rem; margin-top: 1.1rem; }
+    .pill { display: inline-block; font-size: 0.68rem; padding: 0.15rem 0.5rem; border-radius: 99px; background: rgba(198,163,92,0.18); color: #8a6c33; }
+    .gate { max-width: 380px; margin: 14vh auto; text-align: center; padding: 0 1.25rem; }
+    .gate input { width: 100%; font: inherit; padding: 0.7rem 0.9rem; border: 1px solid rgba(0,0,0,0.25); border-radius: 8px; margin: 1rem 0; box-sizing: border-box; text-align: center; }
+    .gate .error { color: #c0392b; font-size: 0.85rem; min-height: 1.2em; }
+    .btn-sm { font: inherit; font-size: 0.82rem; padding: 0.55rem 1.1rem; border-radius: 8px; cursor: pointer; border: 1px solid #1d1d1d; background: #1d1d1d; color: #fff; }
+    .btn-sm.outline { background: #fff; color: #1d1d1d; }
+    .btn-sm.gold { background: #c6a35c; border-color: #c6a35c; color: #fff; }
+    .btn-sm:hover { opacity: 0.88; }
+  </style>
+</head>
+<body data-page="admin">
+
+  <div class="gate" id="admin-gate" style="display:none">
+    <p class="eyebrow">Mahseri Jewellery</p>
+    <h1>Catalogue Manager</h1>
+    <p style="opacity:0.7; font-size:0.9rem">Enter the admin passcode to continue.</p>
+    <input type="password" id="gate-pass" placeholder="Passcode" autocomplete="off" />
+    <p class="error" id="gate-error"></p>
+    <button class="btn-sm gold" id="gate-enter">Enter</button>
+  </div>
+
+  <div class="admin-wrap" id="admin-app" style="display:none">
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow" style="margin:0">Mahseri Jewellery</p>
+        <h1>Catalogue Manager</h1>
+      </div>
+      <div class="admin-actions">
+        <a class="btn-sm outline" href="index.html" style="text-decoration:none; display:inline-flex; align-items:center">View site</a>
+        <button class="btn-sm outline" id="btn-reset">Reset to original</button>
+        <button class="btn-sm gold" id="btn-export">Download data.js</button>
+      </div>
+    </div>
+
+    <div class="admin-note">
+      Changes you make here are saved <strong>in this browser only</strong> and take effect
+      immediately on this device. To publish your changes for all visitors, click
+      <strong>Download data.js</strong> and replace the <code>js/data.js</code> file on your
+      website host (or in your GitHub repository), then redeploy.
+    </div>
+
+    <div class="admin-grid">
+      <div>
+        <table class="admin-table">
+          <thead>
+            <tr><th>Piece</th><th>Category</th><th>Metal</th><th>Price</th><th></th></tr>
+          </thead>
+          <tbody id="product-rows"></tbody>
+        </table>
+      </div>
+
+      <form class="admin-form" id="product-form">
+        <h2 id="form-title">Add a new piece</h2>
+        <input type="hidden" id="f-id" />
+        <div class="field">
+          <label for="f-name">Name</label>
+          <input id="f-name" required />
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="f-category">Category</label>
+            <select id="f-category">
+              <option>Necklaces</option>
+              <option>Rings</option>
+              <option>Bracelets</option>
+              <option>Earrings</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-material">Metal</label>
+            <select id="f-material">
+              <option>21K Gold</option>
+              <option>18K Gold</option>
+              <option>925 Silver</option>
+            </select>
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="f-price">Price (JOD)</label>
+            <input id="f-price" type="number" min="1" step="1" required />
+          </div>
+          <div class="field">
+            <label for="f-weight">Weight (e.g. 8.1 g)</label>
+            <input id="f-weight" required />
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="f-badge">Badge</label>
+            <select id="f-badge">
+              <option value="">None</option>
+              <option>New</option>
+              <option>Bestseller</option>
+              <option>Signature</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-art">Artwork style</label>
+            <select id="f-art">
+              <option value="ring">Ring</option>
+              <option value="necklace">Necklace</option>
+              <option value="pendant">Pendant</option>
+              <option value="earrings">Earrings</option>
+              <option value="bangle">Bangle / Cuff</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-desc">Description</label>
+          <textarea id="f-desc" rows="4" required></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-sm gold" type="submit" id="btn-save">Add piece</button>
+          <button class="btn-sm outline" type="button" id="btn-cancel" style="display:none">Cancel edit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

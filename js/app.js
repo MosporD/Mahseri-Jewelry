@@ -519,6 +519,84 @@
     if (el) el.textContent = text;
   }
 
+  /* ---------- Order notifications (Telegram + email invoice) ---------- */
+
+  var PAYMENT_LABELS = {
+    cod: "Cash on delivery",
+    cliq: "CliQ / bank transfer",
+    whatsapp: "WhatsApp confirmation",
+    card: "Card — Visa / Mastercard"
+  };
+
+  function orderText(order) {
+    return [
+      "🛍 NEW ORDER — " + order.no,
+      "",
+      order.items.map(function (it) {
+        return "• " + it.name + " ×" + it.qty + " — " + formatPrice(it.lineTotal);
+      }).join("\n"),
+      "",
+      "Subtotal: " + formatPrice(order.subtotal),
+      "Delivery: " + (order.shipping === 0 ? "Free" : formatPrice(order.shipping)),
+      "TOTAL: " + formatPrice(order.total),
+      "",
+      "Payment: " + (PAYMENT_LABELS[order.payment] || order.payment),
+      "Name: " + order.name,
+      "Phone: " + order.phone,
+      "Email: " + order.email,
+      "City: " + order.city,
+      "Address: " + order.address,
+      order.notes ? "Notes: " + order.notes : ""
+    ].join("\n").trim();
+  }
+
+  function notifyOrder(order) {
+    var cfg = typeof MAHSERI_NOTIFY !== "undefined" ? MAHSERI_NOTIFY : null;
+    if (!cfg) return;
+
+    // Telegram message to the owner
+    var tg = cfg.telegram;
+    if (tg && tg.enabled && tg.botToken && tg.chatId) {
+      fetch("https://api.telegram.org/bot" + tg.botToken + "/sendMessage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: tg.chatId, text: orderText(order) })
+      }).catch(function () { /* notification failure must not block the order */ });
+    }
+
+    // Branded invoice email via EmailJS (to customer, BCC to the atelier)
+    var ej = cfg.emailjs;
+    if (ej && ej.enabled && window.emailjs && ej.publicKey && ej.serviceId && ej.templateId) {
+      var itemsHtml = order.items.map(function (it) {
+        return (
+          '<tr>' +
+          '<td style="padding:10px 0;border-bottom:1px solid #eee5d0;">' + it.name +
+          ' <span style="color:#9b8a66;">&times;' + it.qty + "</span></td>" +
+          '<td align="right" style="padding:10px 0;border-bottom:1px solid #eee5d0;">' +
+          formatPrice(it.lineTotal) + "</td></tr>"
+        );
+      }).join("");
+      try {
+        emailjs.init({ publicKey: ej.publicKey });
+        emailjs.send(ej.serviceId, ej.templateId, {
+          order_no: order.no,
+          order_date: order.date,
+          customer_name: order.name,
+          customer_phone: order.phone,
+          customer_email: order.email,
+          city: order.city,
+          address: order.address,
+          payment_method: PAYMENT_LABELS[order.payment] || order.payment,
+          notes: order.notes || "—",
+          items_html: itemsHtml,
+          subtotal: formatPrice(order.subtotal),
+          shipping: order.shipping === 0 ? "Free" : formatPrice(order.shipping),
+          total: formatPrice(order.total)
+        }).catch(function () { /* ignore */ });
+      } catch (e) { /* ignore */ }
+    }
+  }
+
   /* ---------- Page: cart & checkout ---------- */
 
   function renderCartPage() {
@@ -597,21 +675,40 @@
       var items = loadCart();
       var subtotal = cartSubtotal();
       var shipping = shippingFor(subtotal);
-      var summaryLines = items.map(function (it) {
-        var p = getProduct(it.id);
-        return "- " + p.name + " x" + it.qty + " (" + formatPrice(p.price * it.qty) + ")";
-      });
-
       var payment = data.get("payment");
+
+      var order = {
+        no: orderNo,
+        date: new Date().toLocaleString("en-GB"),
+        name: data.get("name"),
+        phone: data.get("phone"),
+        email: data.get("email"),
+        city: data.get("city"),
+        address: data.get("address"),
+        notes: data.get("notes") || "",
+        payment: payment,
+        items: items.map(function (it) {
+          var p = getProduct(it.id);
+          return { name: p.name, qty: it.qty, price: p.price, lineTotal: p.price * it.qty };
+        }),
+        subtotal: subtotal,
+        shipping: shipping,
+        total: subtotal + shipping
+      };
+
+      notifyOrder(order);
+
       if (payment === "whatsapp") {
         var msg = [
           "Hello Mahseri Jewellery, I would like to place order " + orderNo + ":",
-          summaryLines.join("\n"),
-          "Total: " + formatPrice(subtotal + shipping),
-          "Name: " + data.get("name"),
-          "Phone: " + data.get("phone"),
-          "City: " + data.get("city"),
-          "Address: " + data.get("address")
+          order.items.map(function (it) {
+            return "- " + it.name + " x" + it.qty + " (" + formatPrice(it.lineTotal) + ")";
+          }).join("\n"),
+          "Total: " + formatPrice(order.total),
+          "Name: " + order.name,
+          "Phone: " + order.phone,
+          "City: " + order.city,
+          "Address: " + order.address
         ].join("\n");
         window.open("https://wa.me/" + MAHSERI_STORE.whatsapp + "?text=" + encodeURIComponent(msg), "_blank");
       }
@@ -623,11 +720,14 @@
       if (success) {
         success.style.display = "block";
         setText("#order-no", "Order " + orderNo);
+        var followUp = payment === "card"
+          ? " with a secure card payment link and to confirm delivery to " + order.city + "."
+          : " within working hours to confirm delivery to " + order.city + ".";
         setText(
           "#order-msg",
-          "Thank you, " + data.get("name").split(" ")[0] +
-          ". Our concierge will call " + data.get("phone") +
-          " within working hours to confirm delivery to " + data.get("city") + "."
+          "Thank you, " + order.name.split(" ")[0] +
+          ". Your invoice is on its way to " + order.email +
+          ". Our concierge will contact " + order.phone + followUp
         );
         if (success.scrollIntoView) success.scrollIntoView({ behavior: "smooth", block: "center" });
       }
@@ -717,5 +817,27 @@
 
     var yearEl = document.querySelector("#year");
     if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    // Live metal prices arrived after first render — repaint anything showing a price
+    document.addEventListener("mahseri:prices-updated", function () {
+      renderCartUI();
+      if (page === "shop") renderShop();
+      if (page === "cart") renderCartPage();
+      if (page === "home") {
+        var grid = document.querySelector("#featured-grid");
+        if (grid) {
+          var featured = MAHSERI_PRODUCTS.slice()
+            .sort(function (a, b) { return (b.badge ? 1 : 0) - (a.badge ? 1 : 0); })
+            .slice(0, 4);
+          grid.innerHTML = featured.map(function (p, i) { return productCard(p, i % 4); }).join("");
+          grid.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("visible"); });
+        }
+      }
+      if (page === "product") {
+        var id = new URLSearchParams(location.search).get("id");
+        var product = getProduct(id) || MAHSERI_PRODUCTS[0];
+        if (product) setText("#pd-price", formatPrice(product.price));
+      }
+    });
   });
 })();

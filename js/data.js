@@ -42,13 +42,13 @@ const MAHSERI_PRODUCTS = [
     id: "dana-band",
     name: "Dana Band",
     category: "Rings",
-    material: "24K Gold",
+    material: "21K Gold",
     price: 980,
     weight: "8.1 g",
     badge: "Signature",
     art: "ring",
     description:
-      "A pure 24K statement band with a softly hammered surface. Each facet is struck by hand, so no two bands ever carry the same light."
+      "A rich 21K statement band with a softly hammered surface. Each facet is struck by hand, so no two bands ever carry the same light."
   },
   {
     id: "wadi-cuff",
@@ -138,13 +138,13 @@ const MAHSERI_PRODUCTS = [
     id: "hala-bangle",
     name: "Hala Bangle",
     category: "Bracelets",
-    material: "24K Gold",
+    material: "21K Gold",
     price: 1980,
     weight: "18.4 g",
     badge: "Signature",
     art: "bangle",
     description:
-      "The heirloom piece: a seamless 24K bangle raised from a single ingot, with a softly domed profile that glows rather than glitters. Made to order in your exact size."
+      "The heirloom piece: a seamless 21K bangle raised from a single ingot, with a softly domed profile that glows rather than glitters. Made to order in your exact size."
   },
   {
     id: "mina-anklet",
@@ -164,12 +164,44 @@ const MAHSERI_STORE = {
   currency: "JOD",
   freeShippingThreshold: 300,
   shippingFlat: 5,
-  phone: "+962 7 9000 0000",
-  whatsapp: "962790000000",
-  email: "hello@mahserijewellery.com",
-  address: "Gold Souq, King Faisal Street, Downtown Amman, Jordan",
+  phone: "+962 7 9715 7007",
+  whatsapp: "962797157007",
+  email: "mahserijewellery@gmail.com",
+  address: "Madaba ST - Wehdat - Amman - Jordan",
   cities: [
     "Amman", "Zarqa", "Irbid", "Aqaba", "Madaba", "Salt",
     "Jerash", "Ajloun", "Karak", "Mafraq", "Tafilah", "Ma'an"
   ]
 };
+
+/* Order notifications — fill in your keys and set enabled: true.
+   Full setup steps are in SETUP-GUIDE.md at the project root. */
+const MAHSERI_NOTIFY = {
+  telegram: {
+    enabled: false,
+    botToken: "PASTE_BOT_TOKEN_HERE",
+    chatId: "PASTE_CHAT_ID_HERE"
+  },
+  emailjs: {
+    enabled: false,
+    publicKey: "PASTE_PUBLIC_KEY_HERE",
+    serviceId: "PASTE_SERVICE_ID_HERE",
+    templateId: "PASTE_TEMPLATE_ID_HERE"
+  }
+};
+
+/* Products edited via admin.html are stored in this browser's localStorage
+   and override the catalogue above. Use "Download data.js" in the admin
+   page and replace this file on your host to publish for all visitors. */
+(function () {
+  try {
+    var saved = localStorage.getItem("mahseri_products_admin_v1");
+    if (saved) {
+      var arr = JSON.parse(saved);
+      if (Array.isArray(arr) && arr.length) {
+        MAHSERI_PRODUCTS.length = 0;
+        arr.forEach(function (p) { MAHSERI_PRODUCTS.push(p); });
+      }
+    }
+  } catch (e) { /* ignore corrupt saved data */ }
+})();
