@@ -457,7 +457,7 @@ h1, h2, h3, .serif {
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1.6rem;
 }
 .product-card {
@@ -479,8 +479,31 @@ h1, h2, h3, .serif {
   background: radial-gradient(420px 300px at 50% 110%, rgba(185, 151, 79, 0.14), transparent 70%), var(--ivory-2);
   overflow: hidden;
 }
-.pc-media svg { width: 58%; transition: transform 0.6s var(--ease); }
-.product-card:hover .pc-media svg { transform: scale(1.1) rotate(2deg); }
+/* Placeholder image fills the whole card; SVG shows on load error */
+.pc-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease);
+}
+.product-card:hover .pc-img { transform: scale(1.06); }
+/* SVG art shown as fallback when image is absent/loading fails */
+.pc-art-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.pc-art-fallback svg { width: 58%; }
+.pc-media:not(:has(.pc-img)) .pc-art-fallback,
+.pc-media .pc-art-fallback { opacity: 1; }
+.pc-media:has(.pc-img) .pc-art-fallback { opacity: 0; }
+.pc-media svg:not(.pc-art-fallback svg) { width: 58%; transition: transform 0.6s var(--ease); }
+.product-card:hover .pc-media > a > svg { transform: scale(1.1) rotate(2deg); }
 .pc-badge {
   position: absolute;
   top: 0.9rem; left: 0.9rem;
@@ -490,7 +513,19 @@ h1, h2, h3, .serif {
   letter-spacing: 0.24em;
   text-transform: uppercase;
   padding: 0.32rem 0.7rem;
+  z-index: 2;
 }
+.pc-gender {
+  position: absolute;
+  top: 0.9rem; right: 0.9rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.65rem;
+  z-index: 2;
+}
+.pc-gender-her { background: rgba(198, 163, 92, 0.18); color: var(--gold); border: 1px solid var(--line-gold); }
+.pc-gender-him { background: rgba(22, 19, 14, 0.08); color: var(--charcoal); border: 1px solid var(--line); }
 .pc-quick {
   position: absolute;
   left: 0; right: 0; bottom: 0;
@@ -504,6 +539,7 @@ h1, h2, h3, .serif {
   transform: translateY(101%);
   transition: transform 0.4s var(--ease);
   width: 100%;
+  z-index: 3;
 }
 .product-card:hover .pc-quick { transform: translateY(0); }
 .pc-quick:hover { background: var(--gold); color: var(--charcoal); }
@@ -701,28 +737,79 @@ h1, h2, h3, .serif {
 }
 .breadcrumb a:hover { color: var(--ivory); }
 
-/* ---------- Shop filters ---------- */
+/* ---------- Shop layout & filters ---------- */
 
-.shop-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.2rem;
-  margin-bottom: 2.6rem;
+.shop-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 2.4rem;
+  align-items: start;
 }
-.filter-group { display: flex; flex-wrap: wrap; gap: 0.55rem; }
-.chip {
-  padding: 0.55rem 1.3rem;
+.shop-filters {
+  position: sticky;
+  top: 110px;
+  background: #fff;
   border: 1px solid var(--line);
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
+  padding: 1.6rem;
+}
+.filter-section { margin-bottom: 1.8rem; }
+.filter-section:last-child { margin-bottom: 0; }
+.filter-label {
+  font-size: 0.64rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+}
+.filter-group { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.chip {
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--line);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink);
   transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 .chip:hover { border-color: var(--gold); color: var(--gold); }
 .chip.active { background: var(--charcoal); border-color: var(--charcoal); color: var(--ivory); }
+.chip-her.active { background: var(--gold); border-color: var(--gold); color: var(--charcoal); }
+.chip-him.active { background: var(--charcoal); border-color: var(--charcoal); color: var(--ivory); }
+.filter-select {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  letter-spacing: 0.06em;
+  width: 100%;
+}
+.shop-main { min-width: 0; }
+.shop-toolbar-desktop {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.4rem;
+}
+.shop-count { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.1em; }
+
+/* Mobile bar (hidden on desktop) */
+.shop-bar-mobile { display: none; }
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--line);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink);
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+.filter-toggle svg { width: 16px; height: 16px; stroke: currentColor; }
+.filter-toggle.active { background: var(--charcoal); border-color: var(--charcoal); color: var(--ivory); }
+.shop-sort { display: flex; align-items: center; gap: 0.7rem; }
 .shop-sort select {
   font: inherit;
   font-size: 0.8rem;
@@ -732,7 +819,6 @@ h1, h2, h3, .serif {
   color: var(--ink);
   letter-spacing: 0.06em;
 }
-.shop-count { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.1em; }
 .empty-note {
   text-align: center;
   padding: 4rem 1rem;
@@ -1161,6 +1247,17 @@ body.drawer-open { overflow: hidden; }
   .value-grid { grid-template-columns: 1fr; }
   .split { grid-template-columns: 1fr; }
   .split .frame { max-width: 440px; }
+  /* Collapse sidebar filter on tablet */
+  .shop-layout { grid-template-columns: 1fr; }
+  .shop-bar-mobile { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.4rem; }
+  .shop-filters {
+    position: static;
+    display: none;
+    margin-bottom: 1.6rem;
+  }
+  .shop-filters.open { display: block; }
+  .shop-toolbar-desktop { display: none; }
+  .desktop-sort { display: none; }
 }
 
 @media (max-width: 760px) {
@@ -1191,4 +1288,11 @@ body.drawer-open { overflow: hidden; }
   .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
   .cart-line { grid-template-columns: 60px 1fr auto; }
   .cart-table { padding: 0.2rem 1rem; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .pc-body { padding: 0.9rem 1rem 1.1rem; }
+  .pc-body h3 { font-size: 1.05rem; }
+  .shop-bar-mobile { flex-wrap: wrap; }
+  .shop-sort select { font-size: 0.74rem; padding: 0.5rem 0.7rem; }
+  /* Make Add to Bag always visible on touch (no hover) */
+  .pc-quick { transform: translateY(0); font-size: 0.62rem; padding: 0.65rem; }
 }

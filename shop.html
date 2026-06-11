@@ -49,24 +49,13 @@
 
     <section class="section">
       <div class="container">
-        <div class="shop-toolbar">
-          <div>
-            <div class="filter-group" role="group" aria-label="Filter by category">
-              <button class="chip" data-filter-category="All">All</button>
-              <button class="chip" data-filter-category="Necklaces">Necklaces</button>
-              <button class="chip" data-filter-category="Rings">Rings</button>
-              <button class="chip" data-filter-category="Bracelets">Bracelets</button>
-              <button class="chip" data-filter-category="Earrings">Earrings</button>
-            </div>
-            <div class="filter-group" style="margin-top:0.6rem" role="group" aria-label="Filter by material">
-              <button class="chip" data-filter-material="All">All metals</button>
-              <button class="chip" data-filter-material="21K Gold">21K</button>
-              <button class="chip" data-filter-material="18K Gold">18K</button>
-              <button class="chip" data-filter-material="925 Silver">925 Silver</button>
-            </div>
-          </div>
+        <div class="shop-bar-mobile">
+          <button class="filter-toggle" id="filter-toggle" aria-expanded="false" aria-controls="shop-filters">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+            Filters
+          </button>
           <div class="shop-sort">
-            <span class="shop-count"></span> &nbsp;
+            <span class="shop-count"></span>
             <select id="shop-sort" aria-label="Sort products">
               <option value="featured">Sort: Featured</option>
               <option value="price-asc">Price: low to high</option>
@@ -76,7 +65,53 @@
           </div>
         </div>
 
-        <div class="product-grid" id="shop-grid"></div>
+        <div class="shop-layout">
+          <aside class="shop-filters" id="shop-filters" aria-label="Product filters">
+            <div class="filter-section">
+              <p class="filter-label">Shop for</p>
+              <div class="filter-group" role="group" aria-label="Filter by gender">
+                <button class="chip active" data-filter-gender="All">Everyone</button>
+                <button class="chip chip-her" data-filter-gender="Her">Her</button>
+                <button class="chip chip-him" data-filter-gender="Him">Him</button>
+              </div>
+            </div>
+            <div class="filter-section">
+              <p class="filter-label">Category</p>
+              <div class="filter-group" role="group" aria-label="Filter by category">
+                <button class="chip active" data-filter-category="All">All</button>
+                <button class="chip" data-filter-category="Necklaces">Necklaces</button>
+                <button class="chip" data-filter-category="Rings">Rings</button>
+                <button class="chip" data-filter-category="Bracelets">Bracelets</button>
+                <button class="chip" data-filter-category="Earrings">Earrings</button>
+              </div>
+            </div>
+            <div class="filter-section">
+              <p class="filter-label">Metal</p>
+              <div class="filter-group" role="group" aria-label="Filter by material">
+                <button class="chip active" data-filter-material="All">All metals</button>
+                <button class="chip" data-filter-material="21K Gold">21K Gold</button>
+                <button class="chip" data-filter-material="18K Gold">18K Gold</button>
+                <button class="chip" data-filter-material="925 Silver">Silver</button>
+              </div>
+            </div>
+            <div class="filter-section desktop-sort">
+              <p class="filter-label">Sort</p>
+              <select id="shop-sort-desktop" aria-label="Sort products" class="filter-select">
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
+                <option value="name">Name: A to Z</option>
+              </select>
+            </div>
+          </aside>
+
+          <div class="shop-main">
+            <div class="shop-toolbar-desktop">
+              <span class="shop-count"></span>
+            </div>
+            <div class="product-grid" id="shop-grid"></div>
+          </div>
+        </div>
       </div>
     </section>
 

@@ -298,11 +298,19 @@
   /* ---------- Product card markup ---------- */
 
   function productCard(p, revealDelay) {
+    var mediaContent = p.image
+      ? '<img class="pc-img" src="' + p.image + '" alt="' + p.name + '" loading="lazy" />' +
+        '<span class="pc-art-fallback" aria-hidden="true">' + artFor(p) + "</span>"
+      : artFor(p);
+    var genderTag = p.gender && p.gender !== "Both"
+      ? '<span class="pc-gender pc-gender-' + p.gender.toLowerCase() + '">' + p.gender + "</span>"
+      : "";
     return (
       '<article class="product-card reveal' + (revealDelay ? " reveal-delay-" + revealDelay : "") + '">' +
       '  <div class="pc-media">' +
       (p.badge ? '<span class="pc-badge">' + p.badge + "</span>" : "") +
-      '    <a href="product.html?id=' + p.id + '" aria-label="' + p.name + '">' + artFor(p) + "</a>" +
+      genderTag +
+      '    <a href="product.html?id=' + p.id + '" aria-label="' + p.name + '">' + mediaContent + "</a>" +
       '    <button class="pc-quick" data-add="' + p.id + '">Add to bag</button>' +
       "  </div>" +
       '  <div class="pc-body">' +
@@ -396,40 +404,55 @@
 
   /* ---------- Page: shop ---------- */
 
-  var shopState = { category: "All", material: "All", sort: "featured" };
+  var shopState = { category: "All", material: "All", gender: "All", sort: "featured" };
 
   function initShop() {
     var params = new URLSearchParams(location.search);
     if (params.get("category")) shopState.category = params.get("category");
     if (params.get("material")) shopState.material = params.get("material");
+    if (params.get("gender")) shopState.gender = params.get("gender");
 
-    document.querySelectorAll("[data-filter-category]").forEach(function (chip) {
-      chip.classList.toggle("active", chip.dataset.filterCategory === shopState.category);
-      chip.addEventListener("click", function () {
-        shopState.category = chip.dataset.filterCategory;
-        document.querySelectorAll("[data-filter-category]").forEach(function (c) {
-          c.classList.toggle("active", c === chip);
+    function bindChips(attr, stateKey) {
+      document.querySelectorAll("[data-filter-" + attr + "]").forEach(function (chip) {
+        var val = chip.dataset["filter" + attr.charAt(0).toUpperCase() + attr.slice(1)];
+        chip.classList.toggle("active", val === shopState[stateKey]);
+        chip.addEventListener("click", function () {
+          shopState[stateKey] = val;
+          document.querySelectorAll("[data-filter-" + attr + "]").forEach(function (c) {
+            c.classList.toggle("active", c === chip);
+          });
+          renderShop();
+        });
+      });
+    }
+
+    bindChips("category", "category");
+    bindChips("material", "material");
+    bindChips("gender", "gender");
+
+    // Both mobile and desktop sort selects stay in sync
+    function bindSort(sel) {
+      if (!sel) return;
+      sel.value = shopState.sort;
+      sel.addEventListener("change", function () {
+        shopState.sort = sel.value;
+        document.querySelectorAll("#shop-sort, #shop-sort-desktop").forEach(function (s) {
+          if (s !== sel) s.value = shopState.sort;
         });
         renderShop();
       });
-    });
+    }
+    bindSort(document.querySelector("#shop-sort"));
+    bindSort(document.querySelector("#shop-sort-desktop"));
 
-    document.querySelectorAll("[data-filter-material]").forEach(function (chip) {
-      chip.classList.toggle("active", chip.dataset.filterMaterial === shopState.material);
-      chip.addEventListener("click", function () {
-        shopState.material = chip.dataset.filterMaterial;
-        document.querySelectorAll("[data-filter-material]").forEach(function (c) {
-          c.classList.toggle("active", c === chip);
-        });
-        renderShop();
-      });
-    });
-
-    var sortSel = document.querySelector("#shop-sort");
-    if (sortSel) {
-      sortSel.addEventListener("change", function () {
-        shopState.sort = sortSel.value;
-        renderShop();
+    // Mobile filter panel toggle
+    var toggle = document.querySelector("#filter-toggle");
+    var panel = document.querySelector("#shop-filters");
+    if (toggle && panel) {
+      toggle.addEventListener("click", function () {
+        var open = panel.classList.toggle("open");
+        toggle.classList.toggle("active", open);
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
       });
     }
 
@@ -445,15 +468,19 @@
     var items = MAHSERI_PRODUCTS.filter(function (p) {
       var okCat = shopState.category === "All" || p.category === shopState.category;
       var okMat = shopState.material === "All" || p.material === shopState.material;
-      return okCat && okMat;
+      var okGen = shopState.gender === "All" ||
+        (p.gender === shopState.gender) ||
+        (p.gender === "Both");
+      return okCat && okMat && okGen;
     });
 
     if (shopState.sort === "price-asc") items.sort(function (a, b) { return a.price - b.price; });
     if (shopState.sort === "price-desc") items.sort(function (a, b) { return b.price - a.price; });
     if (shopState.sort === "name") items.sort(function (a, b) { return a.name.localeCompare(b.name); });
 
-    var countEl = document.querySelector(".shop-count");
-    if (countEl) countEl.textContent = items.length + (items.length === 1 ? " piece" : " pieces");
+    document.querySelectorAll(".shop-count").forEach(function (el) {
+      el.textContent = items.length + (items.length === 1 ? " piece" : " pieces");
+    });
 
     grid.innerHTML = items.length
       ? items.map(function (p, i) { return productCard(p, i % 4); }).join("")
