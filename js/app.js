@@ -299,8 +299,7 @@
 
   function productCard(p, revealDelay) {
     var mediaContent = p.image
-      ? '<img class="pc-img" src="' + p.image + '" alt="' + p.name + '" loading="lazy" />' +
-        '<span class="pc-art-fallback" aria-hidden="true">' + artFor(p) + "</span>"
+      ? '<img class="pc-img" src="' + p.image + '" alt="' + p.name + '" loading="lazy" onerror="this.style.display=\'none\'" />'
       : artFor(p);
     var genderTag = p.gender && p.gender !== "Both"
       ? '<span class="pc-gender pc-gender-' + p.gender.toLowerCase() + '">' + p.gender + "</span>"

@@ -479,7 +479,7 @@ h1, h2, h3, .serif {
   background: radial-gradient(420px 300px at 50% 110%, rgba(185, 151, 79, 0.14), transparent 70%), var(--ivory-2);
   overflow: hidden;
 }
-/* Placeholder image fills the whole card; SVG shows on load error */
+/* Placeholder / product image fills the whole card */
 .pc-img {
   position: absolute;
   inset: 0;
@@ -487,22 +487,11 @@ h1, h2, h3, .serif {
   height: 100%;
   object-fit: cover;
   transition: transform 0.6s var(--ease);
+  display: block;
 }
 .product-card:hover .pc-img { transform: scale(1.06); }
-/* SVG art shown as fallback when image is absent/loading fails */
-.pc-art-fallback {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.pc-art-fallback svg { width: 58%; }
-.pc-media:not(:has(.pc-img)) .pc-art-fallback,
-.pc-media .pc-art-fallback { opacity: 1; }
-.pc-media:has(.pc-img) .pc-art-fallback { opacity: 0; }
-.pc-media svg:not(.pc-art-fallback svg) { width: 58%; transition: transform 0.6s var(--ease); }
+/* SVG art (when no image is set) */
+.pc-media > a > svg { width: 58%; transition: transform 0.6s var(--ease); }
 .product-card:hover .pc-media > a > svg { transform: scale(1.1) rotate(2deg); }
 .pc-badge {
   position: absolute;
