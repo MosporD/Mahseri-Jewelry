@@ -63,6 +63,93 @@
       '<circle cx="100" cy="100" r="48" stroke="' + GOLD_SOFT + '" stroke-width="1.6"/>' +
       '<circle cx="100" cy="38" r="7" fill="' + GOLD + '"/>' +
       '<circle cx="156" cy="120" r="5" fill="' + GOLD_SOFT + '"/>' +
+      "</svg>",
+    brooch:
+      '<svg viewBox="0 0 200 200" fill="none" aria-hidden="true">' +
+      '<ellipse cx="100" cy="100" rx="60" ry="44" stroke="' + GOLD + '" stroke-width="6"/>' +
+      '<ellipse cx="100" cy="100" rx="46" ry="31" stroke="' + GOLD_SOFT + '" stroke-width="1.6"/>' +
+      '<path d="M100 84 L114 100 L100 116 L86 100 Z" stroke="' + GOLD + '" stroke-width="4" stroke-linejoin="round"/>' +
+      '<circle cx="100" cy="64" r="3.6" fill="' + GOLD + '"/>' +
+      '<circle cx="100" cy="136" r="3.6" fill="' + GOLD + '"/>' +
+      '<circle cx="52" cy="100" r="3.6" fill="' + GOLD_SOFT + '"/>' +
+      '<circle cx="148" cy="100" r="3.6" fill="' + GOLD_SOFT + '"/>' +
+      '<path d="M50 150 L150 138" stroke="' + GOLD_SOFT + '" stroke-width="2"/>' +
+      '<circle cx="50" cy="150" r="5" stroke="' + GOLD_SOFT + '" stroke-width="2"/>' +
+      '<path d="M150 138 l8 -1 -3 6" stroke="' + GOLD_SOFT + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+      "</svg>",
+    nose:
+      '<svg viewBox="0 0 200 200" fill="none" aria-hidden="true">' +
+      '<circle cx="68" cy="112" r="33" stroke="' + GOLD + '" stroke-width="5"/>' +
+      '<circle cx="68" cy="79" r="6" fill="' + GOLD + '"/>' +
+      '<circle cx="138" cy="76" r="6.5" stroke="' + GOLD + '" stroke-width="3"/>' +
+      '<circle cx="138" cy="63" r="3.4" fill="' + GOLD_SOFT + '"/>' +
+      '<circle cx="150" cy="71" r="3.4" fill="' + GOLD_SOFT + '"/>' +
+      '<circle cx="145" cy="86" r="3.4" fill="' + GOLD_SOFT + '"/>' +
+      '<circle cx="131" cy="86" r="3.4" fill="' + GOLD_SOFT + '"/>' +
+      '<circle cx="126" cy="71" r="3.4" fill="' + GOLD_SOFT + '"/>' +
+      '<path d="M138 92 C138 116 140 130 128 140 C124 143 119 143 116 140" stroke="' + GOLD + '" stroke-width="3" stroke-linecap="round"/>' +
+      "</svg>",
+    anklet:
+      '<svg viewBox="0 0 200 200" fill="none" aria-hidden="true">' +
+      '<path d="M26 74 C42 122 70 140 100 142 C130 140 158 122 174 74" stroke="' + GOLD + '" stroke-width="3.4" stroke-linecap="round"/>' +
+      '<path d="M34 74 C49 114 73 130 100 132 C127 130 151 114 166 74" stroke="' + GOLD_SOFT + '" stroke-width="1.5"/>' +
+      '<circle cx="26" cy="74" r="5" stroke="' + GOLD + '" stroke-width="3"/>' +
+      '<circle cx="174" cy="74" r="5" stroke="' + GOLD + '" stroke-width="3"/>' +
+      '<circle cx="62" cy="122" r="4" fill="' + GOLD_SOFT + '"/>' +
+      '<circle cx="138" cy="122" r="4" fill="' + GOLD_SOFT + '"/>' +
+      '<circle cx="100" cy="142" r="5" fill="' + GOLD + '"/>' +
+      '<path d="M100 150 C92 160 92 170 100 174 C108 170 108 160 100 150 Z" stroke="' + GOLD + '" stroke-width="3" stroke-linejoin="round"/>' +
+      "</svg>",
+    navel:
+      '<svg viewBox="0 0 200 200" fill="none" aria-hidden="true">' +
+      '<path d="M104 48 C126 80 126 120 104 152" stroke="' + GOLD + '" stroke-width="5" stroke-linecap="round"/>' +
+      '<circle cx="104" cy="48" r="9" fill="' + GOLD + '"/>' +
+      '<path d="M88 150 L104 134 L120 150 L104 176 Z" stroke="' + GOLD + '" stroke-width="4" stroke-linejoin="round"/>' +
+      '<path d="M88 150 L120 150" stroke="' + GOLD_SOFT + '" stroke-width="1.5"/>' +
+      '<path d="M104 134 L104 176" stroke="' + GOLD_SOFT + '" stroke-width="1.5"/>' +
+      '<path d="M124 56 l0 12 M118 62 l12 0" stroke="' + GOLD_SOFT + '" stroke-width="2" stroke-linecap="round"/>' +
+      "</svg>",
+    gemstone:
+      '<svg viewBox="0 0 200 200" fill="none" aria-hidden="true">' +
+      '<path d="M58 86 L74 70 L126 70 L142 86 L100 154 Z" stroke="' + GOLD + '" stroke-width="5" stroke-linejoin="round"/>' +
+      '<path d="M74 70 L126 70" stroke="' + GOLD + '" stroke-width="3"/>' +
+      '<path d="M58 86 L142 86" stroke="' + GOLD + '" stroke-width="3"/>' +
+      '<path d="M74 70 L86 86 M126 70 L114 86 M100 70 L100 86" stroke="' + GOLD_SOFT + '" stroke-width="1.6"/>' +
+      '<path d="M58 86 L100 154 M142 86 L100 154 M86 86 L100 154 M114 86 L100 154" stroke="' + GOLD_SOFT + '" stroke-width="1.6"/>' +
+      '<path d="M150 58 l0 12 M144 64 l12 0" stroke="' + GOLD_SOFT + '" stroke-width="2" stroke-linecap="round"/>' +
+      "</svg>",
+    fullset:
+      '<svg viewBox="0 0 200 200" fill="none" aria-hidden="true">' +
+      '<rect x="48" y="100" width="104" height="62" rx="8" stroke="' + GOLD + '" stroke-width="5"/>' +
+      '<path d="M48 100 L66 72 L134 72 L152 100" stroke="' + GOLD + '" stroke-width="4" stroke-linejoin="round"/>' +
+      '<path d="M48 118 L152 118" stroke="' + GOLD_SOFT + '" stroke-width="1.6"/>' +
+      '<rect x="94" y="95" width="12" height="10" stroke="' + GOLD + '" stroke-width="2.5"/>' +
+      '<path d="M78 142 L84 133 L90 142 L84 152 Z" stroke="' + GOLD + '" stroke-width="2.6" stroke-linejoin="round"/>' +
+      '<path d="M100 138 L107 127 L114 138 L107 150 Z" stroke="' + GOLD + '" stroke-width="2.8" stroke-linejoin="round"/>' +
+      '<path d="M122 142 L128 133 L134 142 L128 152 Z" stroke="' + GOLD + '" stroke-width="2.6" stroke-linejoin="round"/>' +
+      '<path d="M100 80 l0 11 M94 85 l12 0" stroke="' + GOLD_SOFT + '" stroke-width="2" stroke-linecap="round"/>' +
+      "</svg>",
+    halfset:
+      '<svg viewBox="0 0 200 200" fill="none" aria-hidden="true">' +
+      '<path d="M50 42 C60 86 80 104 100 108 C120 104 140 86 150 42" stroke="' + GOLD + '" stroke-width="3.4" stroke-linecap="round"/>' +
+      '<path d="M100 108 L100 116" stroke="' + GOLD + '" stroke-width="3"/>' +
+      '<path d="M100 116 L108 126 L100 138 L92 126 Z" stroke="' + GOLD + '" stroke-width="3" stroke-linejoin="round"/>' +
+      '<circle cx="72" cy="162" r="16" stroke="' + GOLD + '" stroke-width="4"/>' +
+      '<circle cx="72" cy="143" r="3.2" fill="' + GOLD + '"/>' +
+      '<circle cx="128" cy="162" r="16" stroke="' + GOLD + '" stroke-width="4"/>' +
+      '<circle cx="128" cy="143" r="3.2" fill="' + GOLD + '"/>' +
+      "</svg>",
+    set3:
+      '<svg viewBox="0 0 200 200" fill="none" aria-hidden="true">' +
+      '<path d="M50 38 C60 80 80 98 100 102 C120 98 140 80 150 38" stroke="' + GOLD + '" stroke-width="3.2" stroke-linecap="round"/>' +
+      '<path d="M100 102 L100 110" stroke="' + GOLD + '" stroke-width="2.8"/>' +
+      '<path d="M100 110 L107 119 L100 130 L93 119 Z" stroke="' + GOLD + '" stroke-width="2.8" stroke-linejoin="round"/>' +
+      '<circle cx="48" cy="158" r="13" stroke="' + GOLD + '" stroke-width="3.6"/>' +
+      '<circle cx="48" cy="142" r="3" fill="' + GOLD + '"/>' +
+      '<circle cx="152" cy="158" r="13" stroke="' + GOLD + '" stroke-width="3.6"/>' +
+      '<circle cx="152" cy="142" r="3" fill="' + GOLD + '"/>' +
+      '<circle cx="100" cy="162" r="15" stroke="' + GOLD + '" stroke-width="5"/>' +
+      '<path d="M92 151 L100 141 L108 151 Z" stroke="' + GOLD + '" stroke-width="3" stroke-linejoin="round"/>' +
       "</svg>"
   };
 

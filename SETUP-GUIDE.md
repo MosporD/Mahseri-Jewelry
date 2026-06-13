@@ -69,10 +69,25 @@ hosted checkout page directly into the site.
 
 ## 5. Live metal pricing (`js/pricing.js`)
 
-Prices can be computed live from international gold/silver prices × product weight.
-The engine is built and tested (free API, no key needed: api.gold-api.com) but **disabled**
-until the Mahseri formulas are confirmed — edit the `formulas` section in `js/pricing.js`
-and set `enabled: true`. Prices are cached for 1 hour in the visitor's browser.
+Prices are computed **live** from the international gold/silver market (free API, no key
+needed: `api.gold-api.com`). Every piece is priced as:
+
+```
+price = (live metal value per gram × weight) + (making charge per gram × weight)
+```
+
+- The **metal value** is pulled live (24K gold and silver per gram, converted to JOD),
+  then adjusted for the piece's karat (21K = 21/24 of pure gold, 925 silver = 0.925, etc.).
+- The **making charge** ("ujra") per gram is your workshop's labour/profit, set per metal
+  in `MAHSERI_MAKING` (`js/data.js`) — or edit it in the catalogue manager (`admin.html`)
+  under **Live gold & silver → making**, then click **Download data.js**.
+
+Live pricing is **on** (`enabled: true` in `js/pricing.js`). Prices are cached for 1 hour in
+the visitor's browser; when offline, the fixed prices saved in `data.js` are used as a fallback.
+To switch back to fixed manual prices, set `enabled: false`.
+
+> Tip: open `admin.html`, set each metal's making charge, and you'll see the whole catalogue
+> reprice instantly from the current gold price. The price shown there is exactly what visitors see.
 
 ---
 
