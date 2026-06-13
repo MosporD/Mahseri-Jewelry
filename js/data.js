@@ -186,6 +186,17 @@ const MAHSERI_PRODUCTS = [
   }
 ];
 
+/* Metal rates — price per gram in JOD, keyed by the material value used on
+   products above. The admin page uses these to auto-calculate a piece's price
+   from its weight and metal (price = weight in grams x rate + making fee).
+   Edit these whenever the gold/silver market moves, or change them in the
+   catalogue manager and click "Download data.js". */
+const MAHSERI_RATES = {
+  "21K Gold": 65,
+  "18K Gold": 56,
+  "925 Silver": 1.2
+};
+
 const MAHSERI_STORE = {
   currency: "JOD",
   freeShippingThreshold: 300,
@@ -227,6 +238,13 @@ const MAHSERI_NOTIFY = {
       if (Array.isArray(arr) && arr.length) {
         MAHSERI_PRODUCTS.length = 0;
         arr.forEach(function (p) { MAHSERI_PRODUCTS.push(p); });
+      }
+    }
+    var savedRates = localStorage.getItem("mahseri_rates_admin_v1");
+    if (savedRates) {
+      var rates = JSON.parse(savedRates);
+      if (rates && typeof rates === "object") {
+        Object.keys(rates).forEach(function (k) { MAHSERI_RATES[k] = rates[k]; });
       }
     }
   } catch (e) { /* ignore corrupt saved data */ }
