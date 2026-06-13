@@ -1,36 +1,30 @@
 /* ============================================================
    Mahseri Jewellery — live metal pricing
-   Fetches live gold (XAU) and silver (XAG) prices and reprices
-   every product from its weight. When disabled or offline, the
-   static prices in data.js are used as-is.
+   Fetches live gold (XAU) and silver (XAG) prices and prices
+   every piece from its weight:
+
+       price = (live metal value/gram x weight) + (making charge/gram x weight)
+
+   The pure metal value comes from the market; the making charge
+   per gram lives in MAHSERI_MAKING (js/data.js, editable in admin).
+   When offline, the static prices in data.js are used as-is.
    ============================================================ */
 
 var MAHSERI_PRICING = {
-  /* Set to true once the formulas below are confirmed. */
-  enabled: false,
+  /* Live pricing is on. Set to false to fall back to the fixed
+     prices stored in data.js. */
+  enabled: true,
 
-  usdToJod: 0.709,              // JOD is pegged to the USD
+  usdToJod: 0.709,              // 1 USD ~ 0.709 JOD (JOD is pegged to the USD)
   gramsPerTroyOunce: 31.1034768,
   cacheMinutes: 60,             // re-fetch live prices at most once per hour
 
-  /* ----------------------------------------------------------
-     FORMULAS — replace with the real Mahseri formulas.
-     Inputs:
-       gold24  = live price of pure (24K) gold, JOD per gram
-       silver  = live price of pure silver, JOD per gram
-       weight  = product weight in grams
-     Must return the final selling price in JOD.
-     ---------------------------------------------------------- */
-  formulas: {
-    "21K Gold": function (gold24, silver, weight) {
-      return (gold24 * 21 / 24) * weight;          // PLACEHOLDER
-    },
-    "18K Gold": function (gold24, silver, weight) {
-      return (gold24 * 18 / 24) * weight;          // PLACEHOLDER
-    },
-    "925 Silver": function (gold24, silver, weight) {
-      return (silver * 0.925) * weight;            // PLACEHOLDER
-    }
+  /* How pure each material is, and which metal it's made of.
+     factor = karat / 24 for gold, fineness for silver. */
+  purity: {
+    "21K Gold":   { metal: "gold",   factor: 21 / 24 },
+    "18K Gold":   { metal: "gold",   factor: 18 / 24 },
+    "925 Silver": { metal: "silver", factor: 0.925 }
   },
 
   round: function (price) { return Math.round(price); }
@@ -39,34 +33,53 @@ var MAHSERI_PRICING = {
 (function () {
   "use strict";
 
-  if (!MAHSERI_PRICING.enabled) return;
-
   var CACHE_KEY = "mahseri_metal_prices_v1";
+  /* Current live value of PURE metal, in JOD per gram. Null until loaded. */
+  var current = null;   // { gold24, silver, ts }
 
   function perGramJod(usdPerOunce) {
     return (usdPerOunce / MAHSERI_PRICING.gramsPerTroyOunce) * MAHSERI_PRICING.usdToJod;
   }
 
-  function applyPrices(xauUsdOz, xagUsdOz) {
-    var gold24 = perGramJod(xauUsdOz);
-    var silver = perGramJod(xagUsdOz);
-    var changed = false;
-
-    MAHSERI_PRODUCTS.forEach(function (p) {
-      var formula = MAHSERI_PRICING.formulas[p.material];
-      var weight = parseFloat(p.weight);
-      if (!formula || !(weight > 0)) return;
-      var price = MAHSERI_PRICING.round(formula(gold24, silver, weight));
-      if (price > 0 && price !== p.price) {
-        p.price = price;
-        changed = true;
-      }
-    });
-
-    if (changed) {
-      document.dispatchEvent(new CustomEvent("mahseri:prices-updated"));
-    }
+  function makingFor(material) {
+    var m = (typeof MAHSERI_MAKING !== "undefined" && MAHSERI_MAKING)
+      ? Number(MAHSERI_MAKING[material]) : 0;
+    return isNaN(m) ? 0 : m;
   }
+
+  function setCurrent(xauUsdOz, xagUsdOz, ts) {
+    current = {
+      gold24: perGramJod(xauUsdOz),
+      silver: perGramJod(xagUsdOz),
+      ts: ts || Date.now()
+    };
+  }
+
+  /* ---------- Public helpers (used by admin.html too) ---------- */
+
+  /* Live value of the PURE-karat metal for a material, JOD per gram
+     (e.g. the 21K-gold value/gram), before any making charge. */
+  MAHSERI_PRICING.metalPerGram = function (material) {
+    var pur = MAHSERI_PRICING.purity[material];
+    if (!current || !pur) return null;
+    return (pur.metal === "gold" ? current.gold24 : current.silver) * pur.factor;
+  };
+
+  /* Final selling price for a material + weight, or null if rates aren't
+     loaded / the inputs are invalid. */
+  MAHSERI_PRICING.priceFor = function (material, weight) {
+    var grams = parseFloat(weight);
+    var perGram = MAHSERI_PRICING.metalPerGram(material);
+    if (perGram == null || !(grams > 0)) return null;
+    return MAHSERI_PRICING.round(perGram * grams + makingFor(material) * grams);
+  };
+
+  /* The current live rates, or null. */
+  MAHSERI_PRICING.liveRates = function () {
+    return current
+      ? { gold24: current.gold24, silver: current.silver, ts: current.ts }
+      : null;
+  };
 
   function readCache() {
     try {
@@ -80,22 +93,56 @@ var MAHSERI_PRICING = {
   }
 
   function fetchLive() {
-    Promise.all([
+    return Promise.all([
       fetch("https://api.gold-api.com/price/XAU").then(function (r) { return r.json(); }),
       fetch("https://api.gold-api.com/price/XAG").then(function (r) { return r.json(); })
     ]).then(function (res) {
       var xau = res[0] && res[0].price;
       var xag = res[1] && res[1].price;
-      if (!(xau > 0) || !(xag > 0)) return;
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ xau: xau, xag: xag, ts: Date.now() }));
-      applyPrices(xau, xag);
-    }).catch(function () { /* offline — keep static prices */ });
+      if (!(xau > 0) || !(xag > 0)) throw new Error("bad price data");
+      var ts = Date.now();
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ xau: xau, xag: xag, ts: ts }));
+      setCurrent(xau, xag, ts);
+      return MAHSERI_PRICING.liveRates();
+    });
   }
 
-  var cached = readCache();
-  if (cached) {
-    applyPrices(cached.xau, cached.xag);
-  } else {
-    fetchLive();
+  /* Ensure live rates are available, then call cb(rates|null).
+     Pass force=true to skip the cache and re-fetch. */
+  MAHSERI_PRICING.ensureRates = function (cb, force) {
+    if (!force) {
+      var cached = readCache();
+      if (cached) {
+        setCurrent(cached.xau, cached.xag, cached.ts);
+        if (cb) cb(MAHSERI_PRICING.liveRates());
+        return;
+      }
+    }
+    fetchLive()
+      .then(function (rates) { if (cb) cb(rates); })
+      .catch(function () { if (cb) cb(null); });
+  };
+
+  /* Reprice every product in MAHSERI_PRODUCTS from the live rates. */
+  MAHSERI_PRICING.repriceProducts = function () {
+    if (typeof MAHSERI_PRODUCTS === "undefined") return false;
+    var changed = false;
+    MAHSERI_PRODUCTS.forEach(function (p) {
+      var price = MAHSERI_PRICING.priceFor(p.material, p.weight);
+      if (price && price > 0 && price !== p.price) {
+        p.price = price;
+        changed = true;
+      }
+    });
+    if (changed) document.dispatchEvent(new CustomEvent("mahseri:prices-updated"));
+    return changed;
+  };
+
+  /* ---------- Auto-run on every page when enabled ---------- */
+
+  if (MAHSERI_PRICING.enabled) {
+    MAHSERI_PRICING.ensureRates(function (rates) {
+      if (rates) MAHSERI_PRICING.repriceProducts();
+    });
   }
 })();

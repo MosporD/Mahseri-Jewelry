@@ -9,7 +9,7 @@
   "use strict";
 
   var STORAGE_KEY = "mahseri_products_admin_v1";
-  var RATES_KEY = "mahseri_rates_admin_v1";
+  var MAKING_KEY = "mahseri_making_admin_v1";
   var SESSION_KEY = "mahseri_admin_session";
   /* NOTE: this passcode only deters casual visitors. Anyone who reads the
      page source can see it — real protection requires a server. Change it
@@ -17,14 +17,15 @@
   var PASSCODE = "mahseri2026";
 
   var products = MAHSERI_PRODUCTS.slice();
-  /* Per-gram price by metal, copied from data.js (which has already merged any
-     saved overrides from localStorage). Edited live in the rates panel. */
-  var rates = {};
-  Object.keys(MAHSERI_RATES).forEach(function (k) { rates[k] = MAHSERI_RATES[k]; });
+  /* Making charge (JOD per gram) by metal. The metal value itself comes live
+     from js/pricing.js; this is the workshop charge added on top. Mirrors
+     MAHSERI_MAKING (data.js), which has already merged any saved overrides. */
+  var making = {};
+  Object.keys(MAHSERI_MAKING).forEach(function (k) { making[k] = MAHSERI_MAKING[k]; });
 
   var editingId = null;
   var currentImage = "";   // the image URL / data URL for the piece being edited
-  var autoPrice = true;    // when true, price = weight x metal rate + making fee
+  var autoPrice = true;    // when true, price = live metal value x weight + making x weight
 
   function $(sel) { return document.querySelector(sel); }
 
@@ -65,24 +66,26 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
   }
 
-  function persistRates() {
-    localStorage.setItem(RATES_KEY, JSON.stringify(rates));
+  function persistMaking() {
+    /* Keep the global MAHSERI_MAKING in sync so pricing.js / repricing uses
+       the latest values, then save the override for next load. */
+    Object.keys(making).forEach(function (k) { MAHSERI_MAKING[k] = making[k]; });
+    localStorage.setItem(MAKING_KEY, JSON.stringify(making));
   }
 
-  /* ---------- Pricing (weight x metal rate) ---------- */
+  /* ---------- Pricing (live metal value + making per gram) ---------- */
 
   function parseWeight(val) {
     var n = parseFloat(String(val == null ? "" : val).replace(/[^0-9.]/g, ""));
     return isNaN(n) ? 0 : n;
   }
 
-  function computePrice(grams, material, makingFee) {
-    var rate = Number(rates[material]) || 0;
-    return Math.max(1, Math.round(grams * rate + (Number(makingFee) || 0)));
+  function fmtRate(n) {
+    return (Math.round(n * 100) / 100).toLocaleString("en-JO", { maximumFractionDigits: 2 });
   }
 
-  /* Recalculate the price field from the current weight, metal and making fee,
-     unless the user has switched the form to manual pricing. */
+  /* Recalculate the price field from the current weight and metal using the
+     live metal value + making charge, unless the form is in manual mode. */
   function recalcPrice() {
     var hint = $("#price-hint");
     if (!autoPrice) {
@@ -91,23 +94,25 @@
     }
     var grams = parseWeight($("#f-weight").value);
     var material = $("#f-material").value;
-    var making = Number($("#f-making").value) || 0;
-    var rate = Number(rates[material]) || 0;
     if (!grams) {
       $("#f-price").value = "";
       hint.innerHTML = 'Enter a weight to price this piece automatically, ' +
         'or <a id="price-toggle">enter the price manually</a>.';
       return;
     }
-    $("#f-price").value = computePrice(grams, material, making);
-    if (!rate) {
-      hint.innerHTML = 'No rate set for ' + esc(material) +
-        ' — add one in Metal rates above, or <a id="price-toggle">enter the price manually</a>.';
-    } else {
-      hint.innerHTML = "= " + (grams || 0) + " g × " + rate + " JOD/g" +
-        (making ? " + " + making + " making" : "") +
-        '. <a id="price-toggle">Edit manually</a>';
+    var price = MAHSERI_PRICING.priceFor(material, grams);
+    if (price == null) {
+      $("#f-price").value = "";
+      hint.innerHTML = 'Live metal prices not loaded yet — ' +
+        '<a id="price-refresh">refresh</a> or <a id="price-toggle">enter the price manually</a>.';
+      return;
     }
+    $("#f-price").value = price;
+    var perGram = MAHSERI_PRICING.metalPerGram(material) || 0;
+    var make = Number(making[material]) || 0;
+    hint.innerHTML = "= " + grams + " g × (" + fmtRate(perGram) + " metal" +
+      (make ? " + " + fmtRate(make) + " making" : "") + ") JOD/g" +
+      '. <a id="price-toggle">Edit manually</a>';
   }
 
   function setAutoPrice(on) {
@@ -116,15 +121,42 @@
     recalcPrice();
   }
 
-  /* ---------- Metal rates editor ---------- */
+  /* ---------- Live rates display ---------- */
 
-  function renderRates() {
-    var html = Object.keys(rates).map(function (metal) {
+  function renderLiveRates() {
+    var el = $("#live-rates");
+    if (!el) return;
+    var r = MAHSERI_PRICING.liveRates();
+    if (!r) {
+      el.innerHTML = "Live prices unavailable — using the saved prices in data.js. " +
+        "Check your connection and Refresh.";
+      return;
+    }
+    el.innerHTML =
+      "Pure 24K gold <strong>" + fmtRate(r.gold24) + " JOD/g</strong> &middot; " +
+      "Silver <strong>" + fmtRate(r.silver) + " JOD/g</strong> " +
+      '<span class="updated">(updated ' + new Date(r.ts).toLocaleString() + ")</span>";
+  }
+
+  /* Reprice the catalogue from current live rates + making charges, and
+     refresh the table so the admin matches what visitors see. */
+  function repriceAndRender() {
+    products.forEach(function (p) {
+      var price = MAHSERI_PRICING.priceFor(p.material, p.weight);
+      if (price && price > 0) p.price = price;
+    });
+    render();
+  }
+
+  /* ---------- Making-charge editor ---------- */
+
+  function renderMaking() {
+    var html = Object.keys(making).map(function (metal) {
       return (
         '<div data-metal="' + esc(metal) + '">' +
-        "<label>" + esc(metal) + "</label>" +
+        "<label>" + esc(metal) + " — making</label>" +
         '<div class="rate-input">' +
-        '<input type="number" min="0" step="0.1" value="' + esc(rates[metal]) + '" data-rate="' + esc(metal) + '" />' +
+        '<input type="number" min="0" step="0.1" value="' + esc(making[metal]) + '" data-making="' + esc(metal) + '" />' +
         '<span class="unit">JOD / g</span>' +
         "</div></div>"
       );
@@ -211,7 +243,6 @@
     $("#f-category").value = p.category;
     $("#f-material").value = p.material;
     $("#f-weight").value = parseWeight(p.weight) || "";
-    $("#f-making").value = p.makingFee != null ? p.makingFee : 0;
     $("#f-badge").value = p.badge || "";
     $("#f-art").value = p.art || "ring";
     $("#f-desc").value = p.description;
@@ -225,7 +256,6 @@
   function resetForm() {
     editingId = null;
     $("#product-form").reset();
-    $("#f-making").value = 0;
     $("#form-title").textContent = "Add a new piece";
     $("#btn-save").textContent = "Add piece";
     $("#btn-cancel").style.display = "none";
@@ -259,11 +289,11 @@
       "        arr.forEach(function (p) { MAHSERI_PRODUCTS.push(p); });\n" +
       "      }\n" +
       "    }\n" +
-      '    var savedRates = localStorage.getItem("' + RATES_KEY + '");\n' +
-      "    if (savedRates) {\n" +
-      "      var r = JSON.parse(savedRates);\n" +
+      '    var savedMaking = localStorage.getItem("' + MAKING_KEY + '");\n' +
+      "    if (savedMaking) {\n" +
+      "      var r = JSON.parse(savedMaking);\n" +
       "      if (r && typeof r === \"object\") {\n" +
-      "        Object.keys(r).forEach(function (k) { MAHSERI_RATES[k] = r[k]; });\n" +
+      "        Object.keys(r).forEach(function (k) { MAHSERI_MAKING[k] = r[k]; });\n" +
       "      }\n" +
       "    }\n" +
       "  } catch (e) { /* ignore corrupt saved data */ }\n" +
@@ -274,8 +304,9 @@
       "   Prices in Jordanian Dinar (JOD). Art keys map to SVG line art in app.js.\n" +
       "   Generated by the catalogue manager on " + new Date().toLocaleString() + " */\n\n" +
       "const MAHSERI_PRODUCTS = " + JSON.stringify(products, null, 2) + ";\n\n" +
-      "/* Metal rates — price per gram in JOD, used to auto-price pieces in admin.html. */\n" +
-      "const MAHSERI_RATES = " + JSON.stringify(rates, null, 2) + ";\n\n" +
+      "/* Making charge (JOD per gram) by metal. The live metal value is added on\n" +
+      "   top by js/pricing.js: price = metal value/g x weight + making/g x weight. */\n" +
+      "const MAHSERI_MAKING = " + JSON.stringify(making, null, 2) + ";\n\n" +
       "const MAHSERI_STORE = " + JSON.stringify(MAHSERI_STORE, null, 2) + ";\n\n" +
       "/* Order notifications — fill in your keys and set enabled: true.\n" +
       "   Full setup steps are in SETUP-GUIDE.md at the project root. */\n" +
@@ -299,27 +330,41 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     initGate();
-    renderRates();
+    renderMaking();
     setAutoPrice(true);
     showImage("");
 
-    /* Metal rates: update live, save, and re-price the open form. */
+    /* Load live gold/silver prices, then price the table and open form. */
+    function loadRates(force) {
+      $("#live-rates").innerHTML = "Loading live prices…";
+      MAHSERI_PRICING.ensureRates(function () {
+        renderLiveRates();
+        repriceAndRender();
+        recalcPrice();
+      }, force);
+    }
+    loadRates(false);
+    $("#btn-refresh-rates").addEventListener("click", function () { loadRates(true); });
+
+    /* Making charge: update live, save, re-price the catalogue and open form. */
     $("#rates-grid").addEventListener("input", function (e) {
-      var input = e.target.closest("[data-rate]");
+      var input = e.target.closest("[data-making]");
       if (!input) return;
-      rates[input.getAttribute("data-rate")] = Math.max(0, Number(input.value) || 0);
-      persistRates();
+      making[input.getAttribute("data-making")] = Math.max(0, Number(input.value) || 0);
+      persistMaking();
+      repriceAndRender();
       recalcPrice();
     });
 
-    /* Re-price whenever weight, metal or making fee changes. */
-    ["f-weight", "f-material", "f-making"].forEach(function (id) {
+    /* Re-price whenever weight or metal changes. */
+    ["f-weight", "f-material"].forEach(function (id) {
       $("#" + id).addEventListener("input", recalcPrice);
     });
 
-    /* Toggle between auto-pricing and manual price entry. */
+    /* Toggle manual pricing, or refresh live prices, from the price hint. */
     $("#price-hint").addEventListener("click", function (e) {
       if (e.target.id === "price-toggle") setAutoPrice(!autoPrice);
+      if (e.target.id === "price-refresh") loadRates(true);
     });
 
     /* Photo: upload a file, paste a URL, or remove. */
@@ -362,7 +407,6 @@
         ? products.find(function (x) { return x.id === editingId; })
         : null;
       var grams = parseWeight($("#f-weight").value);
-      var making = Math.max(0, Math.round(Number($("#f-making").value) || 0));
       /* Start from the existing piece so fields the form doesn't edit
          (e.g. gender, name_ar) are preserved. */
       var entry = Object.assign({}, existing, {
@@ -372,12 +416,12 @@
         material: $("#f-material").value,
         price: Math.max(1, Math.round(Number($("#f-price").value) || 0)),
         weight: grams ? grams + " g" : "",
-        makingFee: making,
         badge: $("#f-badge").value || null,
         art: $("#f-art").value,
         image: currentImage || "",
         description: $("#f-desc").value.trim()
       });
+      delete entry.makingFee;   // making is now a per-gram charge, not per piece
       if (!entry.name || !entry.price) return;
 
       if (editingId) {
@@ -397,7 +441,7 @@
     $("#btn-reset").addEventListener("click", function () {
       if (confirm("Discard all changes made in this browser and restore the original catalogue from data.js?")) {
         localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(RATES_KEY);
+        localStorage.removeItem(MAKING_KEY);
         location.reload();
       }
     });

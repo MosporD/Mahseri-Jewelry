@@ -38,6 +38,9 @@
     .rates-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.1rem 1.3rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); margin-bottom: 1.75rem; }
     .rates-card h2 { font-size: 1.05rem; margin: 0 0 0.2rem; }
     .rates-card p.hint { font-size: 0.8rem; opacity: 0.7; margin: 0 0 0.9rem; line-height: 1.5; }
+    .live-rates { font-size: 0.92rem; margin: 0 0 0.7rem; }
+    .live-rates strong { color: #8a6c33; }
+    .live-rates .updated { font-size: 0.76rem; opacity: 0.6; }
     .rates-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.9rem; }
     .rates-grid label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.3rem; opacity: 0.7; }
     .rates-grid .rate-input { display: flex; align-items: center; gap: 0.4rem; }
@@ -94,12 +97,14 @@
     </div>
 
     <div class="rates-card">
-      <h2>Metal rates</h2>
+      <h2>Live gold &amp; silver</h2>
       <p class="hint">
-        Price per gram, in JOD. New and edited pieces are priced automatically
-        from their <strong>weight &times; the rate for their metal</strong> (plus any
-        making fee). Update these whenever the gold or silver price moves.
+        The metal value is pulled <strong>live from the market</strong>. Each piece is
+        priced as <strong>(metal value per gram &times; weight) + (making charge per gram
+        &times; weight)</strong>. Set your workshop's making charge per gram below.
       </p>
+      <p class="live-rates" id="live-rates">Loading live prices…</p>
+      <button class="btn-sm outline" id="btn-refresh-rates" type="button" style="margin-bottom:1rem">Refresh prices</button>
       <div class="rates-grid" id="rates-grid"></div>
     </div>
 
@@ -128,6 +133,14 @@
               <option>Rings</option>
               <option>Bracelets</option>
               <option>Earrings</option>
+              <option>Brooches</option>
+              <option>Nose Jewellery</option>
+              <option>Anklets</option>
+              <option>Navel Rings</option>
+              <option>Precious Stones</option>
+              <option>Full Set</option>
+              <option>Half Set</option>
+              <option>3 Piece Set</option>
             </select>
           </div>
           <div class="field">
@@ -139,15 +152,9 @@
             </select>
           </div>
         </div>
-        <div class="row-2">
-          <div class="field">
-            <label for="f-weight">Weight (grams)</label>
-            <input id="f-weight" type="number" min="0" step="0.1" required />
-          </div>
-          <div class="field">
-            <label for="f-making">Making fee (JOD)</label>
-            <input id="f-making" type="number" min="0" step="1" value="0" />
-          </div>
+        <div class="field">
+          <label for="f-weight">Weight (grams)</label>
+          <input id="f-weight" type="number" min="0" step="0.1" required />
         </div>
         <div class="field">
           <label for="f-price">Price (JOD)</label>
@@ -172,6 +179,14 @@
               <option value="pendant">Pendant</option>
               <option value="earrings">Earrings</option>
               <option value="bangle">Bangle / Cuff</option>
+              <option value="brooch">Brooch</option>
+              <option value="nose">Nose stud / ring</option>
+              <option value="anklet">Anklet</option>
+              <option value="navel">Navel ring</option>
+              <option value="gemstone">Precious stone</option>
+              <option value="fullset">Full set</option>
+              <option value="halfset">Half set</option>
+              <option value="set3">3-piece set</option>
             </select>
           </div>
         </div>
@@ -200,6 +215,7 @@
   </div>
 
   <script src="js/data.js"></script>
+  <script src="js/pricing.js"></script>
   <script src="js/admin.js"></script>
 </body>
 </html>
