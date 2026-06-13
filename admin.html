@@ -33,6 +33,26 @@
     .admin-form .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
     .admin-form .form-actions { display: flex; gap: 0.6rem; margin-top: 1.1rem; }
     .pill { display: inline-block; font-size: 0.68rem; padding: 0.15rem 0.5rem; border-radius: 99px; background: rgba(198,163,92,0.18); color: #8a6c33; }
+    .admin-table .thumb-cell { width: 46px; }
+    .admin-table .thumb { width: 42px; height: 42px; border-radius: 7px; object-fit: cover; background: #f4f1ea; display: block; }
+    .rates-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.1rem 1.3rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); margin-bottom: 1.75rem; }
+    .rates-card h2 { font-size: 1.05rem; margin: 0 0 0.2rem; }
+    .rates-card p.hint { font-size: 0.8rem; opacity: 0.7; margin: 0 0 0.9rem; line-height: 1.5; }
+    .rates-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.9rem; }
+    .rates-grid label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.3rem; opacity: 0.7; }
+    .rates-grid .rate-input { display: flex; align-items: center; gap: 0.4rem; }
+    .rates-grid input { width: 100%; font: inherit; font-size: 0.9rem; padding: 0.5rem 0.6rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 7px; box-sizing: border-box; }
+    .rates-grid .unit { font-size: 0.78rem; opacity: 0.6; white-space: nowrap; }
+    .price-hint { font-size: 0.74rem; opacity: 0.7; margin-top: 0.3rem; min-height: 1em; }
+    .price-hint a { color: #8a6c33; cursor: pointer; text-decoration: underline; }
+    .img-field .img-preview-wrap { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem; }
+    .img-field .img-preview { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; background: #f4f1ea; border: 1px solid rgba(0,0,0,0.12); flex: none; }
+    .img-field .img-buttons { display: flex; flex-direction: column; gap: 0.4rem; }
+    .img-field .img-buttons label.file-btn { font-size: 0.78rem; padding: 0.35rem 0.7rem; border-radius: 6px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; text-align: center; text-transform: none; letter-spacing: 0; opacity: 1; margin: 0; }
+    .img-field .img-buttons label.file-btn:hover { border-color: #c6a35c; color: #8a6c33; }
+    .img-field .img-buttons button { font: inherit; font-size: 0.78rem; padding: 0.35rem 0.7rem; border-radius: 6px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }
+    .img-field .img-buttons button:hover { border-color: #c0392b; color: #c0392b; }
+    .img-field input[type=file] { display: none; }
     .gate { max-width: 380px; margin: 14vh auto; text-align: center; padding: 0 1.25rem; }
     .gate input { width: 100%; font: inherit; padding: 0.7rem 0.9rem; border: 1px solid rgba(0,0,0,0.25); border-radius: 8px; margin: 1rem 0; box-sizing: border-box; text-align: center; }
     .gate .error { color: #c0392b; font-size: 0.85rem; min-height: 1.2em; }
@@ -73,11 +93,21 @@
       website host (or in your GitHub repository), then redeploy.
     </div>
 
+    <div class="rates-card">
+      <h2>Metal rates</h2>
+      <p class="hint">
+        Price per gram, in JOD. New and edited pieces are priced automatically
+        from their <strong>weight &times; the rate for their metal</strong> (plus any
+        making fee). Update these whenever the gold or silver price moves.
+      </p>
+      <div class="rates-grid" id="rates-grid"></div>
+    </div>
+
     <div class="admin-grid">
       <div>
         <table class="admin-table">
           <thead>
-            <tr><th>Piece</th><th>Category</th><th>Metal</th><th>Price</th><th></th></tr>
+            <tr><th class="thumb-cell"></th><th>Piece</th><th>Category</th><th>Metal</th><th>Price</th><th></th></tr>
           </thead>
           <tbody id="product-rows"></tbody>
         </table>
@@ -111,13 +141,18 @@
         </div>
         <div class="row-2">
           <div class="field">
-            <label for="f-price">Price (JOD)</label>
-            <input id="f-price" type="number" min="1" step="1" required />
+            <label for="f-weight">Weight (grams)</label>
+            <input id="f-weight" type="number" min="0" step="0.1" required />
           </div>
           <div class="field">
-            <label for="f-weight">Weight (e.g. 8.1 g)</label>
-            <input id="f-weight" required />
+            <label for="f-making">Making fee (JOD)</label>
+            <input id="f-making" type="number" min="0" step="1" value="0" />
           </div>
+        </div>
+        <div class="field">
+          <label for="f-price">Price (JOD)</label>
+          <input id="f-price" type="number" min="1" step="1" required readonly />
+          <p class="price-hint" id="price-hint"></p>
         </div>
         <div class="row-2">
           <div class="field">
@@ -139,6 +174,18 @@
               <option value="bangle">Bangle / Cuff</option>
             </select>
           </div>
+        </div>
+        <div class="field img-field">
+          <label>Photo</label>
+          <div class="img-preview-wrap">
+            <img class="img-preview" id="f-img-preview" alt="" />
+            <div class="img-buttons">
+              <label class="file-btn" for="f-img-file">Upload photo</label>
+              <input id="f-img-file" type="file" accept="image/*" />
+              <button type="button" id="f-img-remove">Remove photo</button>
+            </div>
+          </div>
+          <input id="f-image" placeholder="…or paste an image URL" />
         </div>
         <div class="field">
           <label for="f-desc">Description</label>

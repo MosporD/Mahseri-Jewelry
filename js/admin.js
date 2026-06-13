@@ -9,6 +9,7 @@
   "use strict";
 
   var STORAGE_KEY = "mahseri_products_admin_v1";
+  var RATES_KEY = "mahseri_rates_admin_v1";
   var SESSION_KEY = "mahseri_admin_session";
   /* NOTE: this passcode only deters casual visitors. Anyone who reads the
      page source can see it — real protection requires a server. Change it
@@ -16,7 +17,14 @@
   var PASSCODE = "mahseri2026";
 
   var products = MAHSERI_PRODUCTS.slice();
+  /* Per-gram price by metal, copied from data.js (which has already merged any
+     saved overrides from localStorage). Edited live in the rates panel. */
+  var rates = {};
+  Object.keys(MAHSERI_RATES).forEach(function (k) { rates[k] = MAHSERI_RATES[k]; });
+
   var editingId = null;
+  var currentImage = "";   // the image URL / data URL for the piece being edited
+  var autoPrice = true;    // when true, price = weight x metal rate + making fee
 
   function $(sel) { return document.querySelector(sel); }
 
@@ -57,12 +65,126 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
   }
 
+  function persistRates() {
+    localStorage.setItem(RATES_KEY, JSON.stringify(rates));
+  }
+
+  /* ---------- Pricing (weight x metal rate) ---------- */
+
+  function parseWeight(val) {
+    var n = parseFloat(String(val == null ? "" : val).replace(/[^0-9.]/g, ""));
+    return isNaN(n) ? 0 : n;
+  }
+
+  function computePrice(grams, material, makingFee) {
+    var rate = Number(rates[material]) || 0;
+    return Math.max(1, Math.round(grams * rate + (Number(makingFee) || 0)));
+  }
+
+  /* Recalculate the price field from the current weight, metal and making fee,
+     unless the user has switched the form to manual pricing. */
+  function recalcPrice() {
+    var hint = $("#price-hint");
+    if (!autoPrice) {
+      hint.innerHTML = 'Manual price. <a id="price-toggle">Auto-price from weight</a>';
+      return;
+    }
+    var grams = parseWeight($("#f-weight").value);
+    var material = $("#f-material").value;
+    var making = Number($("#f-making").value) || 0;
+    var rate = Number(rates[material]) || 0;
+    if (!grams) {
+      $("#f-price").value = "";
+      hint.innerHTML = 'Enter a weight to price this piece automatically, ' +
+        'or <a id="price-toggle">enter the price manually</a>.';
+      return;
+    }
+    $("#f-price").value = computePrice(grams, material, making);
+    if (!rate) {
+      hint.innerHTML = 'No rate set for ' + esc(material) +
+        ' — add one in Metal rates above, or <a id="price-toggle">enter the price manually</a>.';
+    } else {
+      hint.innerHTML = "= " + (grams || 0) + " g × " + rate + " JOD/g" +
+        (making ? " + " + making + " making" : "") +
+        '. <a id="price-toggle">Edit manually</a>';
+    }
+  }
+
+  function setAutoPrice(on) {
+    autoPrice = on;
+    $("#f-price").readOnly = on;
+    recalcPrice();
+  }
+
+  /* ---------- Metal rates editor ---------- */
+
+  function renderRates() {
+    var html = Object.keys(rates).map(function (metal) {
+      return (
+        '<div data-metal="' + esc(metal) + '">' +
+        "<label>" + esc(metal) + "</label>" +
+        '<div class="rate-input">' +
+        '<input type="number" min="0" step="0.1" value="' + esc(rates[metal]) + '" data-rate="' + esc(metal) + '" />' +
+        '<span class="unit">JOD / g</span>' +
+        "</div></div>"
+      );
+    }).join("");
+    $("#rates-grid").innerHTML = html;
+  }
+
+  /* ---------- Image upload ---------- */
+
+  function showImage(url) {
+    currentImage = url || "";
+    var preview = $("#f-img-preview");
+    if (currentImage) {
+      preview.src = currentImage;
+      preview.style.display = "";
+    } else {
+      preview.removeAttribute("src");
+      preview.style.display = "none";
+    }
+  }
+
+  /* Downscale an uploaded photo to a data URL so it stays small enough for
+     localStorage and loads fast on the site. Falls back to the raw file if
+     anything goes wrong. */
+  function readImageFile(file, cb) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var max = 900;
+        var w = img.width, h = img.height;
+        if (w > max || h > max) {
+          if (w >= h) { h = Math.round(h * max / w); w = max; }
+          else { w = Math.round(w * max / h); h = max; }
+        }
+        try {
+          var canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          cb(canvas.toDataURL("image/jpeg", 0.85));
+        } catch (e) {
+          cb(reader.result);
+        }
+      };
+      img.onerror = function () { cb(reader.result); };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
   /* ---------- Table ---------- */
 
   function render() {
     var rows = products.map(function (p) {
+      var thumb = p.image
+        ? '<img class="thumb" src="' + esc(p.image) + '" alt="" loading="lazy" />'
+        : '<span class="thumb"></span>';
       return (
         '<tr data-id="' + esc(p.id) + '">' +
+        '<td class="thumb-cell">' + thumb + "</td>" +
         "<td><strong>" + esc(p.name) + "</strong>" +
         (p.badge ? ' <span class="pill">' + esc(p.badge) + "</span>" : "") + "</td>" +
         "<td>" + esc(p.category) + "</td>" +
@@ -75,7 +197,7 @@
       );
     }).join("");
     $("#product-rows").innerHTML =
-      rows || '<tr><td colspan="5" style="opacity:0.6">No pieces yet — add your first one.</td></tr>';
+      rows || '<tr><td colspan="6" style="opacity:0.6">No pieces yet — add your first one.</td></tr>';
   }
 
   function startEdit(id) {
@@ -88,20 +210,27 @@
     $("#f-name").value = p.name;
     $("#f-category").value = p.category;
     $("#f-material").value = p.material;
-    $("#f-price").value = p.price;
-    $("#f-weight").value = p.weight;
+    $("#f-weight").value = parseWeight(p.weight) || "";
+    $("#f-making").value = p.makingFee != null ? p.makingFee : 0;
     $("#f-badge").value = p.badge || "";
     $("#f-art").value = p.art || "ring";
     $("#f-desc").value = p.description;
+    showImage(p.image || "");
+    $("#f-image").value = (p.image && p.image.indexOf("data:") !== 0) ? p.image : "";
+    setAutoPrice(true);
+    $("#f-price").value = p.price;
     $("#f-name").focus();
   }
 
   function resetForm() {
     editingId = null;
     $("#product-form").reset();
+    $("#f-making").value = 0;
     $("#form-title").textContent = "Add a new piece";
     $("#btn-save").textContent = "Add piece";
     $("#btn-cancel").style.display = "none";
+    showImage("");
+    setAutoPrice(true);
   }
 
   function slugify(name) {
@@ -130,6 +259,13 @@
       "        arr.forEach(function (p) { MAHSERI_PRODUCTS.push(p); });\n" +
       "      }\n" +
       "    }\n" +
+      '    var savedRates = localStorage.getItem("' + RATES_KEY + '");\n' +
+      "    if (savedRates) {\n" +
+      "      var r = JSON.parse(savedRates);\n" +
+      "      if (r && typeof r === \"object\") {\n" +
+      "        Object.keys(r).forEach(function (k) { MAHSERI_RATES[k] = r[k]; });\n" +
+      "      }\n" +
+      "    }\n" +
       "  } catch (e) { /* ignore corrupt saved data */ }\n" +
       "})();\n";
 
@@ -138,6 +274,8 @@
       "   Prices in Jordanian Dinar (JOD). Art keys map to SVG line art in app.js.\n" +
       "   Generated by the catalogue manager on " + new Date().toLocaleString() + " */\n\n" +
       "const MAHSERI_PRODUCTS = " + JSON.stringify(products, null, 2) + ";\n\n" +
+      "/* Metal rates — price per gram in JOD, used to auto-price pieces in admin.html. */\n" +
+      "const MAHSERI_RATES = " + JSON.stringify(rates, null, 2) + ";\n\n" +
       "const MAHSERI_STORE = " + JSON.stringify(MAHSERI_STORE, null, 2) + ";\n\n" +
       "/* Order notifications — fill in your keys and set enabled: true.\n" +
       "   Full setup steps are in SETUP-GUIDE.md at the project root. */\n" +
@@ -161,6 +299,46 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     initGate();
+    renderRates();
+    setAutoPrice(true);
+    showImage("");
+
+    /* Metal rates: update live, save, and re-price the open form. */
+    $("#rates-grid").addEventListener("input", function (e) {
+      var input = e.target.closest("[data-rate]");
+      if (!input) return;
+      rates[input.getAttribute("data-rate")] = Math.max(0, Number(input.value) || 0);
+      persistRates();
+      recalcPrice();
+    });
+
+    /* Re-price whenever weight, metal or making fee changes. */
+    ["f-weight", "f-material", "f-making"].forEach(function (id) {
+      $("#" + id).addEventListener("input", recalcPrice);
+    });
+
+    /* Toggle between auto-pricing and manual price entry. */
+    $("#price-hint").addEventListener("click", function (e) {
+      if (e.target.id === "price-toggle") setAutoPrice(!autoPrice);
+    });
+
+    /* Photo: upload a file, paste a URL, or remove. */
+    $("#f-img-file").addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      readImageFile(file, function (url) {
+        showImage(url);
+        $("#f-image").value = "";
+      });
+      e.target.value = "";
+    });
+    $("#f-image").addEventListener("input", function () {
+      showImage($("#f-image").value.trim());
+    });
+    $("#f-img-remove").addEventListener("click", function () {
+      showImage("");
+      $("#f-image").value = "";
+    });
 
     $("#product-rows").addEventListener("click", function (e) {
       var btn = e.target.closest("[data-act]");
@@ -180,17 +358,26 @@
 
     $("#product-form").addEventListener("submit", function (e) {
       e.preventDefault();
-      var entry = {
+      var existing = editingId
+        ? products.find(function (x) { return x.id === editingId; })
+        : null;
+      var grams = parseWeight($("#f-weight").value);
+      var making = Math.max(0, Math.round(Number($("#f-making").value) || 0));
+      /* Start from the existing piece so fields the form doesn't edit
+         (e.g. gender, name_ar) are preserved. */
+      var entry = Object.assign({}, existing, {
         id: editingId || slugify($("#f-name").value),
         name: $("#f-name").value.trim(),
         category: $("#f-category").value,
         material: $("#f-material").value,
         price: Math.max(1, Math.round(Number($("#f-price").value) || 0)),
-        weight: $("#f-weight").value.trim(),
+        weight: grams ? grams + " g" : "",
+        makingFee: making,
         badge: $("#f-badge").value || null,
         art: $("#f-art").value,
+        image: currentImage || "",
         description: $("#f-desc").value.trim()
-      };
+      });
       if (!entry.name || !entry.price) return;
 
       if (editingId) {
@@ -210,6 +397,7 @@
     $("#btn-reset").addEventListener("click", function () {
       if (confirm("Discard all changes made in this browser and restore the original catalogue from data.js?")) {
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(RATES_KEY);
         location.reload();
       }
     });
