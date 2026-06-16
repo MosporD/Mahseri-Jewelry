@@ -465,13 +465,27 @@
       toggle.addEventListener("click", function () {
         var open = nav.classList.toggle("open");
         toggle.classList.toggle("open", open);
+        document.body.classList.toggle("nav-open", open);
         toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
       });
       nav.querySelectorAll("a").forEach(function (a) {
         a.addEventListener("click", function () {
           nav.classList.remove("open");
           toggle.classList.remove("open");
+          document.body.classList.remove("nav-open");
+          toggle.setAttribute("aria-expanded", "false");
+          toggle.setAttribute("aria-label", "Open menu");
         });
+      });
+      document.addEventListener("click", function (e) {
+        if (!nav.classList.contains("open")) return;
+        if (nav.contains(e.target) || toggle.contains(e.target)) return;
+        nav.classList.remove("open");
+        toggle.classList.remove("open");
+        document.body.classList.remove("nav-open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Open menu");
       });
     }
 
