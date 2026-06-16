@@ -462,6 +462,21 @@
     var toggle = document.querySelector(".menu-toggle");
     var nav = document.querySelector(".site-nav");
     if (toggle && nav) {
+      var navShell = document.querySelector(".nav-shell");
+      var navActions = document.querySelector(".nav-actions");
+      var mobileNav = window.matchMedia("(max-width: 760px)");
+
+      function placeNavForViewport() {
+        if (mobileNav.matches) {
+          if (nav.parentElement !== document.body) document.body.appendChild(nav);
+        } else if (navShell && navActions && nav.parentElement !== navShell) {
+          closeNav();
+          navShell.insertBefore(nav, navActions);
+          nav.classList.remove("open", "dragging");
+          nav.style.transform = "";
+        }
+      }
+
       var backdrop = document.querySelector(".nav-backdrop");
       if (!backdrop) {
         backdrop = document.createElement("div");
@@ -479,16 +494,24 @@
         if (open) {
           scrollY = window.scrollY;
           document.body.style.top = "-" + scrollY + "px";
+          nav.classList.remove("dragging");
+          nav.style.transform = "";
+          nav.setAttribute("aria-hidden", "false");
+          backdrop.classList.add("visible");
+          document.body.classList.add("nav-open");
+          requestAnimationFrame(function () {
+            nav.classList.add("open");
+          });
         } else {
           document.body.style.top = "";
           window.scrollTo(0, scrollY);
+          nav.classList.remove("open", "dragging");
+          nav.style.transform = "";
+          nav.setAttribute("aria-hidden", "true");
+          backdrop.classList.remove("visible");
+          document.body.classList.remove("nav-open");
         }
-        nav.classList.toggle("open", open);
         toggle.classList.toggle("open", open);
-        document.body.classList.toggle("nav-open", open);
-        backdrop.classList.toggle("visible", open);
-        nav.classList.remove("dragging");
-        nav.style.transform = "";
         toggle.setAttribute("aria-expanded", open ? "true" : "false");
         toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
       }
@@ -514,7 +537,7 @@
       nav.addEventListener("touchmove", function (e) {
         if (!dragging) return;
         touchDeltaX = Math.max(0, e.touches[0].clientX - touchStartX);
-        nav.style.transform = "translateX(" + touchDeltaX + "px)";
+        nav.style.transform = "translate3d(" + touchDeltaX + "px, 0, 0)";
       }, { passive: true });
 
       function endNavDrag() {
@@ -540,11 +563,15 @@
         if (!dragging) return;
         touchDeltaX = Math.max(0, e.touches[0].clientX - touchStartX);
         nav.classList.add("dragging");
-        nav.style.transform = "translateX(" + touchDeltaX + "px)";
+        nav.style.transform = "translate3d(" + touchDeltaX + "px, 0, 0)";
       }, { passive: true });
 
       backdrop.addEventListener("touchend", endNavDrag, { passive: true });
       backdrop.addEventListener("touchcancel", endNavDrag, { passive: true });
+
+      placeNavForViewport();
+      if (mobileNav.addEventListener) mobileNav.addEventListener("change", placeNavForViewport);
+      else if (mobileNav.addListener) mobileNav.addListener(placeNavForViewport);
     }
 
     // Highlight current page in nav
