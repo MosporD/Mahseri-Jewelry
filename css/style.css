@@ -809,6 +809,21 @@ html[dir="rtl"] .pd-copy h1 { font-family: "Cormorant Garamond", "Segoe UI", ser
 .site-footer .brand-name { color: var(--ivory); }
 .site-footer .monogram { border-color: rgba(216, 188, 126, 0.4); color: var(--ivory); }
 .footer-about { font-size: 0.9rem; margin-top: 1.2rem; max-width: 300px; }
+.footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.4rem;
+  margin-top: 1.4rem;
+  padding: 0;
+  list-style: none;
+}
+.footer-social a {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+}
+.footer-social a:hover { color: var(--ivory); }
 .footer-grid h4 {
   font-size: 0.72rem;
   font-weight: 400;
