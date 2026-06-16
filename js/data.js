@@ -173,7 +173,7 @@ const MAHSERI_PRODUCTS = [
   {
     id: "mina-anklet",
     name: "Mina Anklet",
-    category: "Bracelets",
+    category: "Anklets",
     material: "925 Silver",
     gender: "Her",
     price: 95,
@@ -184,6 +184,31 @@ const MAHSERI_PRODUCTS = [
     description:
       "A fine sterling anklet with hand-set beads spaced along the chain. Finished with a two-centimetre extender for the perfect drape."
   }
+];
+
+const MAHSERI_CATEGORIES = [
+  "Necklaces",
+  "Rings",
+  "Bracelets",
+  "Earrings",
+  "Brooches",
+  "Nose Jewellery",
+  "Anklets",
+  "Leg Chains",
+  "Navel Rings",
+  "Full Set",
+  "Half Set",
+  "3 Piece Set"
+];
+
+/* Gem types — used on shop-gems.html (not mixed with jewellery categories). */
+const MAHSERI_GEM_TYPES = [
+  "Ruby",
+  "Emerald",
+  "Sapphire",
+  "Diamond",
+  "Pearl",
+  "Semi-Precious"
 ];
 
 /* Metal rates — price per gram in JOD, keyed by the material value used on
@@ -215,15 +240,21 @@ const MAHSERI_STORE = {
    Full setup steps are in SETUP-GUIDE.md at the project root. */
 const MAHSERI_NOTIFY = {
   telegram: {
-    enabled: false,
-    botToken: "PASTE_BOT_TOKEN_HERE",
-    chatId: "PASTE_CHAT_ID_HERE"
+    enabled: true,
+    botToken: "8943736269:AAFzqxcT2eYIvanCrmF_svfqtLodaNkxjQg",
+    chatId: "5306835048",
+    channelId: "-1004372771709",
+    siteUrl: "http://localhost:8000",
+    metalAlerts: {
+      enabled: true,
+      intervalMinutes: 10
+    }
   },
   emailjs: {
     enabled: false,
     publicKey: "PASTE_PUBLIC_KEY_HERE",
-    serviceId: "PASTE_SERVICE_ID_HERE",
-    templateId: "PASTE_TEMPLATE_ID_HERE"
+      serviceId: "PASTE_SERVICE_ID_HERE",
+      templateId: "PASTE_TEMPLATE_ID_HERE"
   }
 };
 

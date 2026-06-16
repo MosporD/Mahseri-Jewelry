@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Shop Mahseri Jewellery — handcrafted necklaces, rings, bracelets and earrings in 21K, 18K gold and 925 silver. Delivered across Jordan." />
-  <title>Shop the Collection | Mahseri Jewellery</title>
+  <meta name="description" content="Shop Mahseri Jewellery — gold, silver and precious gems. Handcrafted in Amman, delivered across Jordan." />
+  <title>Shop | Mahseri Jewellery</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body data-page="shop">
+<body data-page="shop-hub">
 
   <header class="site-header">
     <p class="announce">Complimentary insured delivery across Jordan on orders over 300 JOD</p>
@@ -42,75 +42,59 @@
     <section class="page-hero">
       <div class="container">
         <p class="breadcrumb"><a href="index.html">Home</a> &nbsp;/&nbsp; Shop</p>
-        <h1>The Collection</h1>
-        <p>Every piece below is handcrafted in our Amman atelier and hallmarked for purity. Filter by family or metal to find yours.</p>
+        <h1 id="shop-hub-title">The Collection</h1>
+        <p id="shop-hub-desc">Every piece is handcrafted in our Amman atelier. Begin with gold, silver, or precious gems.</p>
       </div>
     </section>
 
     <section class="section">
       <div class="container">
-        <div class="shop-bar-mobile">
-          <button class="filter-toggle" id="filter-toggle" aria-expanded="false" aria-controls="shop-filters">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
-            Filters
-          </button>
-          <div class="shop-sort">
-            <span class="shop-count"></span>
-            <select id="shop-sort" aria-label="Sort products">
-              <option value="featured">Sort: Featured</option>
-              <option value="price-asc">Price: low to high</option>
-              <option value="price-desc">Price: high to low</option>
-              <option value="name">Name: A to Z</option>
-            </select>
-          </div>
+        <div class="section-head reveal">
+          <p class="eyebrow" id="shop-hub-eyebrow">Choose your collection</p>
+          <h2 id="shop-hub-headline">Gold, silver or gems — one standard of craft</h2>
         </div>
-
-        <div class="shop-layout">
-          <aside class="shop-filters" id="shop-filters" aria-label="Product filters">
-            <div class="filter-section">
-              <p class="filter-label">Shop for</p>
-              <div class="filter-group" role="group" aria-label="Filter by gender">
-                <button class="chip active" data-filter-gender="All">Everyone</button>
-                <button class="chip chip-her" data-filter-gender="Her">Her</button>
-                <button class="chip chip-him" data-filter-gender="Him">Him</button>
-              </div>
+        <div class="collection-grid shop-metal-grid">
+          <a class="collection-card collection-card-gold reveal" href="shop-gold.html">
+            <div class="cc-art">
+              <svg viewBox="0 0 200 200" fill="none" aria-hidden="true">
+                <circle cx="100" cy="118" r="52" stroke="#d8bc7e" stroke-width="7"/>
+                <path d="M78 64 L100 34 L122 64 L100 80 Z" stroke="#d8bc7e" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M30 32 C45 105 75 130 100 134 C125 130 155 105 170 32" stroke="rgba(216,188,126,0.5)" stroke-width="3" stroke-linecap="round"/>
+              </svg>
             </div>
-            <div class="filter-section">
-              <p class="filter-label">Category</p>
-              <div class="filter-group" role="group" aria-label="Filter by category">
-                <button class="chip active" data-filter-category="All">All</button>
-                <button class="chip" data-filter-category="Necklaces">Necklaces</button>
-                <button class="chip" data-filter-category="Rings">Rings</button>
-                <button class="chip" data-filter-category="Bracelets">Bracelets</button>
-                <button class="chip" data-filter-category="Earrings">Earrings</button>
-              </div>
+            <div class="cc-veil"></div>
+            <span class="cc-arrow">&rarr;</span>
+            <div class="cc-info">
+              <h3 id="shop-hub-gold-title">Gold</h3>
+              <p id="shop-hub-gold-sub">21K &amp; 18K</p>
             </div>
-            <div class="filter-section">
-              <p class="filter-label">Metal</p>
-              <div class="filter-group" role="group" aria-label="Filter by material">
-                <button class="chip active" data-filter-material="All">All metals</button>
-                <button class="chip" data-filter-material="21K Gold">21K Gold</button>
-                <button class="chip" data-filter-material="18K Gold">18K Gold</button>
-                <button class="chip" data-filter-material="925 Silver">Silver</button>
-              </div>
+          </a>
+          <a class="collection-card collection-card-silver reveal reveal-delay-1" href="shop-silver.html">
+            <div class="cc-art">
+              <svg viewBox="0 0 200 200" fill="none" aria-hidden="true">
+                <circle cx="100" cy="100" r="62" stroke="#c8ccd4" stroke-width="8"/>
+                <circle cx="100" cy="100" r="48" stroke="rgba(200,204,212,0.45)" stroke-width="1.6"/>
+                <circle cx="100" cy="38" r="7" fill="#c8ccd4"/>
+              </svg>
             </div>
-            <div class="filter-section desktop-sort">
-              <p class="filter-label">Sort</p>
-              <select id="shop-sort-desktop" aria-label="Sort products" class="filter-select">
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price: low to high</option>
-                <option value="price-desc">Price: high to low</option>
-                <option value="name">Name: A to Z</option>
-              </select>
+            <div class="cc-veil"></div>
+            <span class="cc-arrow">&rarr;</span>
+            <div class="cc-info">
+              <h3 id="shop-hub-silver-title">Silver</h3>
+              <p id="shop-hub-silver-sub">925 Sterling</p>
             </div>
-          </aside>
-
-          <div class="shop-main">
-            <div class="shop-toolbar-desktop">
-              <span class="shop-count"></span>
+          </a>
+          <a class="collection-card collection-card-gems reveal reveal-delay-2" href="shop-gems.html">
+            <div class="cc-art">
+              <img class="art-line" src="assets/art/precious-stone.svg" alt="" aria-hidden="true" />
             </div>
-            <div class="product-grid" id="shop-grid"></div>
-          </div>
+            <div class="cc-veil"></div>
+            <span class="cc-arrow">&rarr;</span>
+            <div class="cc-info">
+              <h3 id="shop-hub-gems-title">Gems</h3>
+              <p id="shop-hub-gems-sub">Precious stones</p>
+            </div>
+          </a>
         </div>
       </div>
     </section>
@@ -138,10 +122,9 @@
         <div>
           <h4>Shop</h4>
           <ul>
-            <li><a href="shop.html?category=Necklaces">Necklaces</a></li>
-            <li><a href="shop.html?category=Rings">Rings</a></li>
-            <li><a href="shop.html?category=Bracelets">Bracelets</a></li>
-            <li><a href="shop.html?category=Earrings">Earrings</a></li>
+            <li><a href="shop-gold.html">Gold</a></li>
+            <li><a href="shop-silver.html">Silver</a></li>
+            <li><a href="shop-gems.html">Gems</a></li>
           </ul>
         </div>
         <div>
@@ -170,7 +153,6 @@
   </footer>
 
   <script src="js/data.js"></script>
-  <script src="js/pricing.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

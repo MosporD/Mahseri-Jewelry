@@ -1,0 +1,17 @@
+{
+  "botToken": "PASTE_BOT_TOKEN_HERE",
+  "chatId": "PASTE_CHAT_ID_HERE",
+  "ownerChatIds": ["PASTE_CHAT_ID_HERE"],
+  "clientChatIds": ["-100CHANNEL_ID_HERE"],
+  "chatIds": [],
+  "intervalMinutes": 10,
+  "usdToJod": 0.71,
+  "gramsPerTroyOunce": 31.1034768,
+  "premiumGold": 1.2,
+  "premiumSilver": 7,
+  "goldSpotAddUsd": 50,
+  "channelId": "-100CHANNEL_ID_HERE",
+  "siteUrl": "https://your-website.com",
+  "productPostsEnabled": true,
+  "productPostIntervalMinutes": 60
+}

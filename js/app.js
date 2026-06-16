@@ -7,6 +7,272 @@
   "use strict";
 
   var CART_KEY = "mahseri_cart_v1";
+  var LANG_KEY = "mahseri_lang_v1";
+
+  var UI = {
+    en: {
+      addToBag: "Add to bag",
+      inStock: "In stock",
+      outOfStock: "Out of stock",
+      soldOut: "Sold out",
+      shipsIn: "Ships in 1–2 days",
+      madeToOrder: "Made to order",
+      yourBag: "Your Bag",
+      bagEmpty: "Your bag is empty — for now.",
+      subtotal: "Subtotal",
+      reviewCheckout: "Review & checkout",
+      remove: "Remove",
+      each: "each",
+      pieces: "pieces",
+      piece: "piece",
+      noMatch: "No pieces match that combination — try another filter.",
+      addedToBag: " added to your bag",
+      added: "Added to your bag",
+      bagIsEmpty: "Your bag is empty",
+      genderHer: "Her",
+      genderHim: "Him",
+      genderBoth: "Both",
+      allCategories: "All",
+      metalGold: "Gold",
+      metalSilver: "Silver",
+      metalGems: "Gems",
+      shopHubTitle: "The Collection",
+      shopHubDesc: "Every piece is handcrafted in our Amman atelier. Begin with gold, silver, or precious gems.",
+      shopHubEyebrow: "Choose your collection",
+      shopHubHeadline: "Gold, silver or gems — one standard of craft",
+      shopHubGoldSub: "21K & 18K",
+      shopHubSilverSub: "925 Sterling",
+      shopHubGemsSub: "Precious stones",
+      shopGoldTitle: "Gold Collection",
+      shopGoldDesc: "21K and 18K pieces handcrafted in our Amman atelier — dense, warm, and hallmarked for purity.",
+      shopSilverTitle: "Silver Collection",
+      shopSilverDesc: "925 sterling pieces — river-smooth polish, sculptural silhouettes, and the same patient hand finish as our gold.",
+      shopGemsTitle: "Precious Gems",
+      shopGemsDesc: "Rubies, emeralds, sapphires, diamonds and pearls — selected for colour, clarity and character.",
+      gemType: "Gem type",
+      allGemTypes: "All gems",
+      filters: "Filters",
+      shopFor: "Shop for",
+      category: "Category",
+      karat: "Karat",
+      sort: "Sort",
+      everyone: "Everyone",
+      allGold: "All gold",
+      collectionsEyebrow: "The Collections",
+      collectionsHeadline: "Every category, one standard of craft",
+      categoryBlurbs: {
+        Necklaces: "Chains & pendants",
+        Rings: "Bands & signets",
+        Bracelets: "Cuffs & bangles",
+        Earrings: "Studs & hoops",
+        Brooches: "Pins & clasps",
+        "Nose Jewellery": "Rings & studs",
+        Anklets: "Fine chain & beads",
+        "Leg Chains": "Ankle to ankle",
+        "Navel Rings": "Curved & set",
+        "Full Set": "Complete matching set",
+        "Half Set": "Necklace & earrings",
+        "3 Piece Set": "Ring, chain & earrings"
+      },
+      categories: {
+        Necklaces: "Necklaces",
+        Rings: "Rings",
+        Bracelets: "Bracelets",
+        Earrings: "Earrings",
+        Brooches: "Brooches",
+        "Nose Jewellery": "Nose Jewellery",
+        Anklets: "Anklets",
+        "Leg Chains": "Leg Chains",
+        "Navel Rings": "Navel Rings",
+        "Full Set": "Full Set",
+        "Half Set": "Half Set",
+        "3 Piece Set": "3 Piece Set"
+      },
+      gemTypes: {
+        Ruby: "Ruby",
+        Emerald: "Emerald",
+        Sapphire: "Sapphire",
+        Diamond: "Diamond",
+        Pearl: "Pearl",
+        "Semi-Precious": "Semi-Precious"
+      },
+      materials: {
+        "21K Gold": "21K Gold", "18K Gold": "18K Gold", "925 Silver": "925 Silver"
+      },
+      badges: {
+        New: "New", Bestseller: "Bestseller", Signature: "Signature"
+      }
+    },
+    ar: {
+      addToBag: "أضف إلى الحقيبة",
+      inStock: "متوفر",
+      outOfStock: "غير متوفر",
+      soldOut: "نفدت الكمية",
+      shipsIn: "الشحن خلال 1–2 يوم",
+      madeToOrder: "حسب الطلب",
+      yourBag: "حقيبتك",
+      bagEmpty: "حقيبتك فارغة — حتى الآن.",
+      subtotal: "المجموع الفرعي",
+      reviewCheckout: "مراجعة الطلب والدفع",
+      remove: "إزالة",
+      each: "للقطعة",
+      pieces: "قطع",
+      piece: "قطعة",
+      noMatch: "لا توجد قطع مطابقة — جرّب فلتراً آخر.",
+      addedToBag: " أُضيفت إلى حقيبتك",
+      added: "أُضيفت إلى حقيبتك",
+      bagIsEmpty: "حقيبتك فارغة",
+      genderHer: "لها",
+      genderHim: "له",
+      genderBoth: "للجنسين",
+      allCategories: "الكل",
+      metalGold: "ذهب",
+      metalSilver: "فضة",
+      metalGems: "أحجار كريمة",
+      shopHubTitle: "المجموعة",
+      shopHubDesc: "كل قطعة مصنوعة يدوياً في مشغلنا في عمّان. ابدأ بالذهب أو الفضة أو الأحجار الكريمة.",
+      shopHubEyebrow: "اختر المجموعة",
+      shopHubHeadline: "ذهب أو فضة أو أحجار — معيار حرفة واحد",
+      shopHubGoldSub: "21 و 18 قيراط",
+      shopHubSilverSub: "فضة 925",
+      shopHubGemsSub: "أحجار كريمة",
+      shopGoldTitle: "مجموعة الذهب",
+      shopGoldDesc: "قطع من الذهب 21 و 18 قيراط — كثيفة ودافئة ومختومة للنقاء.",
+      shopSilverTitle: "مجموعة الفضة",
+      shopSilverDesc: "قطع من الفضة 925 — لمعان ناعم وخطوط نحتية ونفس إتقان مشغلنا.",
+      shopGemsTitle: "الأحجار الكريمة",
+      shopGemsDesc: "ياقوت وزمرد وياقوت أزرق وألماس ولؤلؤ — مختارة للونها ونقائها.",
+      gemType: "نوع الحجر",
+      allGemTypes: "كل الأحجار",
+      filters: "تصفية",
+      shopFor: "تسوق لـ",
+      category: "الفئة",
+      karat: "العيار",
+      sort: "ترتيب",
+      everyone: "الجميع",
+      allGold: "كل الذهب",
+      collectionsEyebrow: "المجموعات",
+      collectionsHeadline: "كل فئة، معيار حرفة واحد",
+      categoryBlurbs: {
+        Necklaces: "سلاسل وقلادات",
+        Rings: "خواتم وخواتم ختم",
+        Bracelets: "أساور وبانجل",
+        Earrings: "حلق وأقراط",
+        Brooches: "بروش ودبوس",
+        "Nose Jewellery": "حلق الأنف",
+        Anklets: "خلاخيل وخرز",
+        "Leg Chains": "سلاسل الرجل",
+        "Navel Rings": "حلق السرة",
+        "Full Set": "طقم كامل متكامل",
+        "Half Set": "قلادة وأقراط",
+        "3 Piece Set": "خاتم وسلسلة وأقراط"
+      },
+      categories: {
+        Necklaces: "قلادات",
+        Rings: "خواتم",
+        Bracelets: "أساور",
+        Earrings: "أقراط",
+        Brooches: "بروش",
+        "Nose Jewellery": "حلي الأنف",
+        Anklets: "خلاخيل",
+        "Leg Chains": "سلاسل الرجل",
+        "Navel Rings": "حلق السرة",
+        "Full Set": "طقم كامل",
+        "Half Set": "نصف طقم",
+        "3 Piece Set": "طقم 3 قطع"
+      },
+      gemTypes: {
+        Ruby: "ياقوت",
+        Emerald: "زمرد",
+        Sapphire: "ياقوت أزرق",
+        Diamond: "ألماس",
+        Pearl: "لؤلؤ",
+        "Semi-Precious": "أحجار شبه كريمة"
+      },
+      materials: {
+        "21K Gold": "ذهب 21 قيراط", "18K Gold": "ذهب 18 قيراط", "925 Silver": "فضة 925"
+      },
+      badges: {
+        New: "جديد", Bestseller: "الأكثر مبيعاً", Signature: "مميز"
+      }
+    }
+  };
+
+  function getLang() {
+    return localStorage.getItem(LANG_KEY) === "ar" ? "ar" : "en";
+  }
+
+  function setLang(lang) {
+    localStorage.setItem(LANG_KEY, lang === "ar" ? "ar" : "en");
+    applyDocumentLang();
+    document.dispatchEvent(new CustomEvent("mahseri:lang-changed"));
+  }
+
+  function applyDocumentLang() {
+    var lang = getLang();
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    document.body.classList.toggle("lang-ar", lang === "ar");
+    var btn = document.querySelector(".lang-toggle");
+    if (btn) btn.textContent = lang === "ar" ? "EN" : "ع";
+  }
+
+  function t(key) {
+    var lang = getLang();
+    return (UI[lang] && UI[lang][key]) || UI.en[key] || key;
+  }
+
+  function pName(p) {
+    return getLang() === "ar" && p.name_ar ? p.name_ar : p.name;
+  }
+
+  function pDesc(p) {
+    return getLang() === "ar" && p.description_ar ? p.description_ar : p.description;
+  }
+
+  function labelCategory(cat) {
+    var lang = getLang();
+    return (UI[lang].categories && UI[lang].categories[cat]) || cat;
+  }
+
+  function labelMaterial(mat) {
+    var lang = getLang();
+    return (UI[lang].materials && UI[lang].materials[mat]) || mat;
+  }
+
+  function labelGender(g) {
+    if (g === "Her") return t("genderHer");
+    if (g === "Him") return t("genderHim");
+    return t("genderBoth");
+  }
+
+  function labelBadge(b) {
+    if (!b) return "";
+    var lang = getLang();
+    return (UI[lang].badges && UI[lang].badges[b]) || b;
+  }
+
+  function labelCategoryBlurb(cat) {
+    var lang = getLang();
+    return (UI[lang].categoryBlurbs && UI[lang].categoryBlurbs[cat]) || "";
+  }
+
+  function labelGemType(type) {
+    var lang = getLang();
+    return (UI[lang].gemTypes && UI[lang].gemTypes[type]) || type;
+  }
+
+  function isGemProduct(p) {
+    return p.collection === "gems" || p.category === "Precious Stones";
+  }
+
+  function productTypeLabel(p) {
+    return isGemProduct(p) ? labelGemType(p.category) : labelCategory(p.category);
+  }
+
+  function orderItemName(p) {
+    return p.name_ar ? p.name + " / " + p.name_ar : p.name;
+  }
 
   /* ---------- Catalogue helpers ---------- */
 
@@ -66,8 +332,30 @@
       "</svg>"
   };
 
+  /* Category / product line art loaded from assets/art/ */
+  var ART_ASSETS = {
+    brooch: "assets/art/brooch.svg",
+    nose: "assets/art/nose.svg",
+    anklet: "assets/art/anklet.svg",
+    legchain: "assets/art/leg-chains.svg",
+    navel: "assets/art/navel-ring.svg",
+    gemstone: "assets/art/precious-stone.svg",
+    fullset: "assets/art/full-set.svg",
+    halfset: "assets/art/half-set.svg",
+    set3: "assets/art/three-piece-set.svg"
+  };
+
+  function artMarkup(key) {
+    if (ART_ASSETS[key]) {
+      return (
+        '<img class="art-line" src="' + ART_ASSETS[key] + '" alt="" aria-hidden="true" loading="lazy" />'
+      );
+    }
+    return ART[key] || ART.ring;
+  }
+
   function artFor(product) {
-    return ART[product.art] || ART.ring;
+    return artMarkup(product.art);
   }
 
   /* ---------- Cart store ---------- */
@@ -87,13 +375,22 @@
     renderCartUI();
   }
 
+  function productInStock(p) {
+    return p && p.inStock !== false;
+  }
+
   function cartAdd(id, qty) {
+    var product = getProduct(id);
+    if (product && !productInStock(product)) {
+      toast(t("soldOut"));
+      return;
+    }
     var items = loadCart();
     var line = items.find(function (it) { return it.id === id; });
     if (line) { line.qty += qty; } else { items.push({ id: id, qty: qty }); }
     saveCart(items);
-    var product = getProduct(id);
-    toast(product ? product.name + " added to your bag" : "Added to your bag");
+    if (product) toast(pName(product) + t("addedToBag"));
+    else toast(t("added"));
     bumpCount();
   }
 
@@ -180,9 +477,26 @@
 
     // Highlight current page in nav
     var page = document.body.getAttribute("data-page");
+    var navPage = page === "shop-hub" ? "shop" : page;
     document.querySelectorAll(".site-nav a[data-nav]").forEach(function (a) {
-      if (a.getAttribute("data-nav") === page) a.classList.add("active");
+      if (a.getAttribute("data-nav") === navPage) a.classList.add("active");
     });
+
+    var actions = document.querySelector(".nav-actions");
+    if (actions && !document.querySelector(".lang-toggle")) {
+      var langBtn = document.createElement("button");
+      langBtn.className = "lang-toggle";
+      langBtn.type = "button";
+      langBtn.setAttribute("aria-label", "Switch language");
+      langBtn.textContent = getLang() === "ar" ? "EN" : "ع";
+      langBtn.addEventListener("click", function () {
+        setLang(getLang() === "ar" ? "en" : "ar");
+      });
+      var cartBtn = actions.querySelector(".cart-button");
+      if (cartBtn) actions.insertBefore(langBtn, cartBtn);
+      else actions.appendChild(langBtn);
+    }
+    applyDocumentLang();
   }
 
   function buildDrawer() {
@@ -196,13 +510,13 @@
     drawer.setAttribute("aria-label", "Shopping bag");
     drawer.innerHTML =
       '<div class="drawer-head">' +
-      '  <h3>Your Bag</h3>' +
+      '  <h3>' + t("yourBag") + '</h3>' +
       '  <button class="drawer-close" aria-label="Close bag">&times;</button>' +
       "</div>" +
       '<div class="drawer-items"></div>' +
       '<div class="drawer-foot">' +
-      '  <div class="drawer-total"><span>Subtotal</span><span class="drawer-subtotal">0 JOD</span></div>' +
-      '  <a class="btn btn-solid btn-wide" href="cart.html">Review &amp; checkout</a>' +
+      '  <div class="drawer-total"><span>' + t("subtotal") + '</span><span class="drawer-subtotal">0 JOD</span></div>' +
+      '  <a class="btn btn-solid btn-wide" href="cart.html">' + t("reviewCheckout") + '</a>' +
       "</div>";
     drawer.querySelector(".drawer-close").addEventListener("click", closeDrawer);
 
@@ -229,7 +543,7 @@
     if (wrap) {
       var items = loadCart();
       if (!items.length) {
-        wrap.innerHTML = '<p class="drawer-empty">Your bag is empty &mdash; for now.</p>';
+        wrap.innerHTML = '<p class="drawer-empty">' + t("bagEmpty") + '</p>';
       } else {
         wrap.innerHTML = items.map(function (it) {
           var p = getProduct(it.id);
@@ -237,8 +551,8 @@
             '<div class="cart-line" data-id="' + p.id + '">' +
             '  <a class="cl-thumb" href="product.html?id=' + p.id + '">' + artFor(p) + "</a>" +
             '  <div>' +
-            '    <h4><a href="product.html?id=' + p.id + '">' + p.name + "</a></h4>" +
-            '    <p class="cl-meta">' + p.material + "</p>" +
+            '    <h4><a href="product.html?id=' + p.id + '">' + pName(p) + "</a></h4>" +
+            '    <p class="cl-meta">' + labelMaterial(p.material) + "</p>" +
             '    <div class="cl-qty">' +
             '      <button data-act="dec" aria-label="Decrease quantity">&minus;</button>' +
             "      <span>" + it.qty + "</span>" +
@@ -247,7 +561,7 @@
             "  </div>" +
             '  <div>' +
             '    <p class="cl-price">' + formatPrice(p.price * it.qty) + "</p>" +
-            '    <button class="cl-remove" data-act="remove">Remove</button>' +
+            '    <button class="cl-remove" data-act="remove">' + t("remove") + '</button>' +
             "  </div>" +
             "</div>"
           );
@@ -278,8 +592,11 @@
 
   /* ---------- Reveal on scroll ---------- */
 
-  function initReveal() {
-    var els = document.querySelectorAll(".reveal");
+  function initReveal(scope) {
+    var els = scope
+      ? scope.querySelectorAll(".reveal")
+      : document.querySelectorAll(".reveal:not([data-reveal-init])");
+    if (!els.length) return;
     if (!("IntersectionObserver" in window)) {
       els.forEach(function (el) { el.classList.add("visible"); });
       return;
@@ -292,32 +609,70 @@
         }
       });
     }, { threshold: 0.12 });
-    els.forEach(function (el) { io.observe(el); });
+    els.forEach(function (el) {
+      el.dataset.revealInit = "1";
+      if (el.classList.contains("visible")) return;
+      io.observe(el);
+    });
   }
 
-  /* ---------- Product card markup ---------- */
+  function encodeImagePath(path) {
+    if (!path || path.indexOf("data:") === 0 || /^https?:\/\//i.test(path)) return path;
+    return path.split("/").map(function (seg) { return encodeURIComponent(seg); }).join("/");
+  }
+
+  function productDetailMedia(p) {
+    var displayName = pName(p);
+    if (p.image) {
+      return (
+        '<img class="pd-img" src="' + encodeImagePath(p.image) + '" alt="' + displayName + '" />' +
+        '<span class="pd-art-fallback" aria-hidden="true">' + artFor(p) + "</span>"
+      );
+    }
+    return artFor(p);
+  }
+
+  function renderProductMedia(product) {
+    var media = document.querySelector("#pd-media");
+    if (!media) return;
+    media.classList.remove("zoomed");
+    var hintText = (media.querySelector(".pd-zoom-hint") || {}).textContent || "Click to zoom";
+    media.innerHTML = productDetailMedia(product);
+    var hint = document.createElement("span");
+    hint.className = "pd-zoom-hint";
+    hint.textContent = hintText;
+    media.appendChild(hint);
+  }
 
   function productCard(p, revealDelay) {
+    var displayName = pName(p);
+    var inStock = productInStock(p);
     var mediaContent = p.image
-      ? '<img class="pc-img" src="' + p.image + '" alt="' + p.name + '" loading="lazy" />' +
+      ? '<img class="pc-img" src="' + encodeImagePath(p.image) + '" alt="' + displayName + '" loading="lazy" />' +
         '<span class="pc-art-fallback" aria-hidden="true">' + artFor(p) + "</span>"
       : artFor(p);
     var genderTag = p.gender && p.gender !== "Both"
-      ? '<span class="pc-gender pc-gender-' + p.gender.toLowerCase() + '">' + p.gender + "</span>"
+      ? '<span class="pc-gender pc-gender-' + p.gender.toLowerCase() + '">' + labelGender(p.gender) + "</span>"
       : "";
+    var stockClass = inStock ? "" : " pc-out-of-stock";
+    var quickBtn = inStock
+      ? '<button class="pc-quick" data-add="' + p.id + '">' + t("addToBag") + "</button>"
+      : '<span class="pc-stock-badge">' + t("outOfStock") + "</span>";
     return (
-      '<article class="product-card reveal' + (revealDelay ? " reveal-delay-" + revealDelay : "") + '">' +
+      '<article class="product-card reveal' + stockClass + (revealDelay ? " reveal-delay-" + revealDelay : "") + '">' +
       '  <div class="pc-media">' +
-      (p.badge ? '<span class="pc-badge">' + p.badge + "</span>" : "") +
+      (p.badge ? '<span class="pc-badge">' + labelBadge(p.badge) + "</span>" : "") +
       genderTag +
-      '    <a href="product.html?id=' + p.id + '" aria-label="' + p.name + '">' + mediaContent + "</a>" +
-      '    <button class="pc-quick" data-add="' + p.id + '">Add to bag</button>' +
+      '    <a href="product.html?id=' + p.id + '" aria-label="' + displayName + '">' + mediaContent + "</a>" +
+      "    " + quickBtn +
       "  </div>" +
       '  <div class="pc-body">' +
-      '    <p class="pc-cat">' + p.category + "</p>" +
-      "    <h3><a href=\"product.html?id=" + p.id + '">' + p.name + "</a></h3>" +
-      '    <p class="pc-material">' + p.material + " &middot; " + p.weight + "</p>" +
+      '    <p class="pc-cat">' + productTypeLabel(p) + "</p>" +
+      "    <h3><a href=\"product.html?id=" + p.id + '">' + displayName + "</a></h3>" +
+      '    <p class="pc-material">' + labelMaterial(p.material) + " &middot; " + p.weight + "</p>" +
       '    <p class="pc-price">' + formatPrice(p.price) + "</p>" +
+      '    <p class="pc-availability' + (inStock ? " in-stock" : " out-of-stock") + '">' +
+      (inStock ? t("inStock") : t("outOfStock")) + "</p>" +
       "  </div>" +
       "</article>"
     );
@@ -334,17 +689,78 @@
 
   /* ---------- Page: home ---------- */
 
-  function initHome() {
-    // Featured products: badges first, then price
+  var CATEGORY_ART = {
+    Necklaces: "necklace",
+    Rings: "ring",
+    Bracelets: "bangle",
+    Earrings: "earrings",
+    Brooches: "brooch",
+    "Nose Jewellery": "nose",
+    Anklets: "anklet",
+    "Leg Chains": "legchain",
+    "Navel Rings": "navel",
+    "Full Set": "fullset",
+    "Half Set": "halfset",
+    "3 Piece Set": "set3"
+  };
+
+  function shopLinkForCategory(cat) {
+    var items = MAHSERI_PRODUCTS.filter(function (p) { return p.category === cat; });
+    var goldMats = ["21K Gold", "18K Gold"];
+    var silverMats = ["925 Silver"];
+    var hasGold = items.some(function (p) { return goldMats.indexOf(p.material) > -1; });
+    var hasSilver = items.some(function (p) { return silverMats.indexOf(p.material) > -1; });
+    var base = hasGold ? "shop-gold.html" : hasSilver ? "shop-silver.html" : "shop-gold.html";
+    return base + "?category=" + encodeURIComponent(cat);
+  }
+
+  function applyHomeCollectionsI18n() {
+    setText("#collections-eyebrow", t("collectionsEyebrow"));
+    setText("#collections-headline", t("collectionsHeadline"));
+  }
+
+  function renderCollectionGrid() {
+    var grid = document.querySelector("#collection-grid");
+    if (!grid || typeof MAHSERI_CATEGORIES === "undefined") return;
+    grid.innerHTML = MAHSERI_CATEGORIES.map(function (cat, i) {
+      var artKey = CATEGORY_ART[cat] || "ring";
+      var art = artMarkup(artKey);
+      var delay = i % 4;
+      return (
+        '<a class="collection-card reveal' + (delay ? " reveal-delay-" + delay : "") +
+        '" href="' + shopLinkForCategory(cat) + '">' +
+        '<div class="cc-art">' + art + "</div>" +
+        '<div class="cc-veil"></div>' +
+        '<span class="cc-arrow">&rarr;</span>' +
+        '<div class="cc-info"><h3>' + labelCategory(cat) + "</h3>" +
+        "<p>" + labelCategoryBlurb(cat) + "</p></div></a>"
+      );
+    }).join("");
+    initReveal(grid);
+  }
+
+  function renderFeaturedGrid() {
+    var grid = document.querySelector("#featured-grid");
+    if (!grid) return;
     var featured = MAHSERI_PRODUCTS.slice()
       .sort(function (a, b) { return (b.badge ? 1 : 0) - (a.badge ? 1 : 0); })
       .slice(0, 4);
-    var grid = document.querySelector("#featured-grid");
-    if (grid) {
-      grid.innerHTML = featured.map(function (p, i) { return productCard(p, i % 4); }).join("");
-      bindQuickAdd(grid);
+    if (!featured.length) {
+      grid.innerHTML =
+        '<p class="empty-note" style="grid-column:1/-1;text-align:center">' +
+        'Pieces coming soon — <a href="shop.html">explore the collection</a>.' +
+        "</p>";
+      return;
     }
+    grid.innerHTML = featured.map(function (p, i) { return productCard(p, i % 4); }).join("");
+    bindQuickAdd(grid);
+    initReveal(grid);
+  }
 
+  function initHome() {
+    applyHomeCollectionsI18n();
+    renderCollectionGrid();
+    renderFeaturedGrid();
     // Gold particles in hero
     var particles = document.querySelector(".particles");
     if (particles) {
@@ -404,13 +820,197 @@
 
   /* ---------- Page: shop ---------- */
 
+  var GOLD_MATERIALS = ["21K Gold", "18K Gold"];
+  var SILVER_MATERIALS = ["925 Silver"];
+
   var shopState = { category: "All", material: "All", gender: "All", sort: "featured" };
+  var shopCategoryFiltersReady = false;
+
+  /* Her collection category photos — assets/standalone (gold; silver map added later) */
+  var HER_CATEGORY_BG_GOLD = {
+    Necklaces: "assets/standalone/Necklaces.jpg",
+    Rings: "assets/standalone/Rings.jpg",
+    Bracelets: "assets/standalone/Bracelets.jpg",
+    Earrings: "assets/standalone/Earings.jpg",
+    Brooches: "assets/standalone/brooches.jpg",
+    "Nose Jewellery": "assets/standalone/NoseJewelry.jpg",
+    Anklets: "assets/standalone/Anklets.jpg",
+    "Leg Chains": "assets/standalone/Legchain.jpg",
+    "Navel Rings": "assets/standalone/Naval Rings,jpg.jpg",
+    "Full Set": "assets/standalone/Fullset.jpg",
+    "Half Set": "assets/standalone/Fullset.jpg",
+    "3 Piece Set": "assets/standalone/Fullset.jpg"
+  };
+  var HER_CATEGORY_BG_SILVER = {};
+
+  function herCategoryBackgroundPath() {
+    if (shopState.category === "All" || shopState.gender === "Him") return "";
+    var metal = getShopMetal();
+    var map = metal === "silver" ? HER_CATEGORY_BG_SILVER : HER_CATEGORY_BG_GOLD;
+    if (metal !== "gold" && metal !== "silver") return "";
+    return map[shopState.category] || "";
+  }
+
+  function applyShopCategoryBackground() {
+    var path = herCategoryBackgroundPath();
+    var hero = document.querySelector(".page-hero");
+    if (!hero) return;
+
+    if (path) {
+      hero.classList.add("has-category-bg");
+      hero.style.backgroundImage = 'url("' + path.replace(/\\/g, "/") + '")';
+      hero.style.backgroundPosition = "center";
+      hero.style.backgroundSize = "cover";
+      hero.style.backgroundRepeat = "no-repeat";
+    } else {
+      hero.classList.remove("has-category-bg");
+      hero.style.backgroundImage = "";
+      hero.style.backgroundPosition = "";
+      hero.style.backgroundSize = "";
+      hero.style.backgroundRepeat = "";
+    }
+  }
+
+  function getShopMetal() {
+    return document.body.getAttribute("data-shop-metal") || "";
+  }
+
+  function matchesShopMetal(product) {
+    var metal = getShopMetal();
+    var gem = isGemProduct(product);
+    if (metal === "gems") return gem;
+    if (metal === "gold") {
+      return GOLD_MATERIALS.indexOf(product.material) > -1 && !gem;
+    }
+    if (metal === "silver") {
+      return SILVER_MATERIALS.indexOf(product.material) > -1 && !gem;
+    }
+    return true;
+  }
+
+  function shopBasePath() {
+    var metal = getShopMetal();
+    if (metal === "gold") return "shop-gold.html";
+    if (metal === "silver") return "shop-silver.html";
+    if (metal === "gems") return "shop-gems.html";
+    return "shop.html";
+  }
+
+  function shopLinkForProduct(p) {
+    if (isGemProduct(p)) return "shop-gems.html?category=" + encodeURIComponent(p.category);
+    var goldMats = ["21K Gold", "18K Gold"];
+    var base = goldMats.indexOf(p.material) > -1 ? "shop-gold.html" : "shop-silver.html";
+    return base + "?category=" + encodeURIComponent(p.category);
+  }
+
+  function applyShopHubI18n() {
+    setText("#shop-hub-title", t("shopHubTitle"));
+    setText("#shop-hub-desc", t("shopHubDesc"));
+    setText("#shop-hub-eyebrow", t("shopHubEyebrow"));
+    setText("#shop-hub-headline", t("shopHubHeadline"));
+    setText("#shop-hub-gold-title", t("metalGold"));
+    setText("#shop-hub-gold-sub", t("shopHubGoldSub"));
+    setText("#shop-hub-silver-title", t("metalSilver"));
+    setText("#shop-hub-silver-sub", t("shopHubSilverSub"));
+    setText("#shop-hub-gems-title", t("metalGems"));
+    setText("#shop-hub-gems-sub", t("shopHubGemsSub"));
+  }
+
+  function applyShopCatalogI18n() {
+    var metal = getShopMetal();
+    if (metal === "gold") {
+      setText("#shop-hero-title", t("shopGoldTitle"));
+      setText("#shop-hero-desc", t("shopGoldDesc"));
+    } else if (metal === "silver") {
+      setText("#shop-hero-title", t("shopSilverTitle"));
+      setText("#shop-hero-desc", t("shopSilverDesc"));
+    } else if (metal === "gems") {
+      setText("#shop-hero-title", t("shopGemsTitle"));
+      setText("#shop-hero-desc", t("shopGemsDesc"));
+    }
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      var key = el.getAttribute("data-i18n");
+      if (key) el.textContent = t(key);
+    });
+    document.querySelectorAll("[data-i18n-chip]").forEach(function (el) {
+      var key = el.getAttribute("data-i18n-chip");
+      if (key === "genderHer") el.textContent = t("genderHer");
+      else if (key === "genderHim") el.textContent = t("genderHim");
+      else if (key) el.textContent = t(key);
+    });
+    document.querySelectorAll(".shop-metal-pill").forEach(function (pill) {
+      var link = pill.getAttribute("data-metal-link");
+      if (link === "gold") pill.textContent = t("metalGold");
+      if (link === "silver") pill.textContent = t("metalSilver");
+      if (link === "gems") pill.textContent = t("metalGems");
+    });
+  }
+
+  function initShopHub() {
+    var params = new URLSearchParams(location.search);
+    var cat = params.get("category");
+    if (cat) {
+      if (cat === "Precious Stones" ||
+          (typeof MAHSERI_GEM_TYPES !== "undefined" && MAHSERI_GEM_TYPES.indexOf(cat) > -1)) {
+        location.replace("shop-gems.html?" + params.toString());
+        return;
+      }
+      location.replace("shop-gold.html?" + params.toString());
+      return;
+    }
+    if (params.get("material") === "925 Silver") {
+      location.replace("shop-silver.html?" + params.toString());
+      return;
+    }
+    if (params.get("material") || params.get("gender")) {
+      location.replace("shop-gold.html?" + params.toString());
+      return;
+    }
+    applyShopHubI18n();
+    initReveal();
+  }
+
+  function renderCategoryFilters() {
+    var wrap = document.querySelector("#category-filters");
+    if (!wrap) return;
+    var isGems = getShopMetal() === "gems";
+    var list = isGems
+      ? (typeof MAHSERI_GEM_TYPES !== "undefined" ? MAHSERI_GEM_TYPES : [])
+      : (typeof MAHSERI_CATEGORIES !== "undefined" ? MAHSERI_CATEGORIES : []);
+    var allLabel = isGems ? t("allGemTypes") : t("allCategories");
+    var html = (
+      '<button type="button" class="chip' + (shopState.category === "All" ? " active" : "") +
+      '" data-filter-category="All">' + allLabel + "</button>"
+    );
+    list.forEach(function (cat) {
+      var label = isGems ? labelGemType(cat) : labelCategory(cat);
+      html += (
+        '<button type="button" class="chip' + (shopState.category === cat ? " active" : "") +
+        '" data-filter-category="' + cat + '">' + label + "</button>"
+      );
+    });
+    wrap.innerHTML = html;
+  }
 
   function initShop() {
+    applyShopCatalogI18n();
     var params = new URLSearchParams(location.search);
     if (params.get("category")) shopState.category = params.get("category");
     if (params.get("material")) shopState.material = params.get("material");
     if (params.get("gender")) shopState.gender = params.get("gender");
+
+    var categoryWrap = document.querySelector("#category-filters");
+    if (categoryWrap && !shopCategoryFiltersReady) {
+      shopCategoryFiltersReady = true;
+      categoryWrap.addEventListener("click", function (e) {
+        var chip = e.target.closest("[data-filter-category]");
+        if (!chip) return;
+        shopState.category = chip.getAttribute("data-filter-category");
+        renderCategoryFilters();
+        renderShop();
+      });
+    }
+    renderCategoryFilters();
 
     function bindChips(attr, stateKey) {
       document.querySelectorAll("[data-filter-" + attr + "]").forEach(function (chip) {
@@ -426,7 +1026,6 @@
       });
     }
 
-    bindChips("category", "category");
     bindChips("material", "material");
     bindChips("gender", "gender");
 
@@ -471,7 +1070,7 @@
       var okGen = shopState.gender === "All" ||
         (p.gender === shopState.gender) ||
         (p.gender === "Both");
-      return okCat && okMat && okGen;
+      return okCat && okMat && okGen && matchesShopMetal(p);
     });
 
     if (shopState.sort === "price-asc") items.sort(function (a, b) { return a.price - b.price; });
@@ -479,53 +1078,58 @@
     if (shopState.sort === "name") items.sort(function (a, b) { return a.name.localeCompare(b.name); });
 
     document.querySelectorAll(".shop-count").forEach(function (el) {
-      el.textContent = items.length + (items.length === 1 ? " piece" : " pieces");
+      el.textContent = items.length + " " + (items.length === 1 ? t("piece") : t("pieces"));
     });
 
     grid.innerHTML = items.length
       ? items.map(function (p, i) { return productCard(p, i % 4); }).join("")
-      : '<p class="empty-note" style="grid-column:1/-1">No pieces match that combination &mdash; try another filter.</p>';
+      : '<p class="empty-note" style="grid-column:1/-1">' + t("noMatch") + '</p>';
+    applyShopCategoryBackground();
     initReveal();
   }
 
   /* ---------- Page: product detail ---------- */
 
-  function initProduct() {
+  var productQty = 1;
+  var productPageReady = false;
+
+  function renderProductContent() {
     var id = new URLSearchParams(location.search).get("id");
     var product = getProduct(id) || MAHSERI_PRODUCTS[0];
-    var qty = 1;
 
-    document.title = product.name + " | Mahseri Jewellery";
-    setText("#pd-category", product.category);
-    setText("#pd-name", product.name);
+    document.title = pName(product) + " | Mahseri Jewellery";
+    renderProductMedia(product);
+    setText("#pd-category", productTypeLabel(product));
+    setText("#pd-name", pName(product));
     setText("#pd-price", formatPrice(product.price));
-    setText("#pd-desc", product.description);
-    setText("#pd-material", product.material);
+    setText("#pd-desc", pDesc(product));
+    setText("#pd-material", labelMaterial(product.material));
     setText("#pd-weight", product.weight);
-    setText("#pd-breadcrumb", product.name);
+    setText("#pd-breadcrumb", pName(product));
 
-    var media = document.querySelector("#pd-media");
-    if (media) {
-      media.insertAdjacentHTML("afterbegin", artFor(product));
-      media.addEventListener("click", function () { media.classList.toggle("zoomed"); });
+    var inStock = productInStock(product);
+    var stockEl = document.querySelector("#pd-stock");
+    if (stockEl) {
+      stockEl.textContent = inStock
+        ? t("inStock") + " · " + t("shipsIn")
+        : t("outOfStock") + " · " + t("madeToOrder");
+      stockEl.classList.toggle("pd-stock-in", inStock);
+      stockEl.classList.toggle("pd-stock-out", !inStock);
     }
+    var addBtn = document.querySelector("#pd-add");
+    if (addBtn) {
+      addBtn.disabled = !inStock;
+      addBtn.textContent = inStock ? t("addToBag") : t("soldOut");
+      addBtn.classList.toggle("is-disabled", !inStock);
+    }
+    var qtyDec = document.querySelector("#qty-dec");
+    var qtyInc = document.querySelector("#qty-inc");
+    if (qtyDec) qtyDec.disabled = !inStock;
+    if (qtyInc) qtyInc.disabled = !inStock;
 
-    var out = document.querySelector("#pd-qty");
-    document.querySelector("#qty-dec").addEventListener("click", function () {
-      qty = Math.max(1, qty - 1);
-      out.textContent = qty;
-    });
-    document.querySelector("#qty-inc").addEventListener("click", function () {
-      qty = Math.min(10, qty + 1);
-      out.textContent = qty;
-    });
+    var shopLink = document.querySelector("#pd-shop-link");
+    if (shopLink) shopLink.href = shopLinkForProduct(product);
 
-    document.querySelector("#pd-add").addEventListener("click", function () {
-      cartAdd(product.id, qty);
-      openDrawer();
-    });
-
-    // Related pieces: same category first, then same material
     var related = MAHSERI_PRODUCTS.filter(function (p) { return p.id !== product.id; })
       .sort(function (a, b) {
         function score(x) {
@@ -538,7 +1142,41 @@
     if (grid) {
       grid.innerHTML = related.map(function (p, i) { return productCard(p, i % 4); }).join("");
       bindQuickAdd(grid);
+      grid.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("visible"); });
     }
+    return product;
+  }
+
+  function initProduct() {
+    var id = new URLSearchParams(location.search).get("id");
+    var product = getProduct(id) || MAHSERI_PRODUCTS[0];
+
+    var media = document.querySelector("#pd-media");
+    if (media && !media.dataset.zoomBound) {
+      media.dataset.zoomBound = "1";
+      media.addEventListener("click", function () { media.classList.toggle("zoomed"); });
+    }
+
+    if (!productPageReady) {
+      productPageReady = true;
+      var out = document.querySelector("#pd-qty");
+      document.querySelector("#qty-dec").addEventListener("click", function () {
+        productQty = Math.max(1, productQty - 1);
+        out.textContent = productQty;
+      });
+      document.querySelector("#qty-inc").addEventListener("click", function () {
+        productQty = Math.min(10, productQty + 1);
+        out.textContent = productQty;
+      });
+      document.querySelector("#pd-add").addEventListener("click", function () {
+        var pid = new URLSearchParams(location.search).get("id");
+        var p = getProduct(pid) || MAHSERI_PRODUCTS[0];
+        cartAdd(p.id, productQty);
+        openDrawer();
+      });
+    }
+
+    renderProductContent();
   }
 
   function setText(sel, text) {
@@ -647,8 +1285,8 @@
         '<div class="cart-line" data-id="' + p.id + '">' +
         '  <a class="cl-thumb" href="product.html?id=' + p.id + '">' + artFor(p) + "</a>" +
         '  <div>' +
-        '    <h4><a href="product.html?id=' + p.id + '">' + p.name + "</a></h4>" +
-        '    <p class="cl-meta">' + p.material + " &middot; " + formatPrice(p.price) + " each</p>" +
+        '    <h4><a href="product.html?id=' + p.id + '">' + pName(p) + "</a></h4>" +
+        '    <p class="cl-meta">' + labelMaterial(p.material) + " &middot; " + formatPrice(p.price) + " " + t("each") + "</p>" +
         '    <div class="cl-qty">' +
         '      <button data-act="dec" aria-label="Decrease quantity">&minus;</button>' +
         "      <span>" + it.qty + "</span>" +
@@ -657,7 +1295,7 @@
         "  </div>" +
         '  <div>' +
         '    <p class="cl-price">' + formatPrice(p.price * it.qty) + "</p>" +
-        '    <button class="cl-remove" data-act="remove">Remove</button>' +
+        '    <button class="cl-remove" data-act="remove">' + t("remove") + '</button>' +
         "  </div>" +
         "</div>"
       );
@@ -695,7 +1333,7 @@
     if (!form) return;
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      if (!loadCart().length) { toast("Your bag is empty"); return; }
+      if (!loadCart().length) { toast(t("bagIsEmpty")); return; }
 
       var data = new FormData(form);
       var orderNo = "MJ-" + Date.now().toString(36).toUpperCase();
@@ -716,7 +1354,7 @@
         payment: payment,
         items: items.map(function (it) {
           var p = getProduct(it.id);
-          return { name: p.name, qty: it.qty, price: p.price, lineTotal: p.price * it.qty };
+          return { name: orderItemName(p), qty: it.qty, price: p.price, lineTotal: p.price * it.qty };
         }),
         subtotal: subtotal,
         shipping: shipping,
@@ -812,6 +1450,24 @@
     });
   }
 
+  function refreshPageContent() {
+    var page = document.body.getAttribute("data-page");
+    renderCartUI();
+    if (page === "shop") {
+      applyShopCatalogI18n();
+      renderCategoryFilters();
+      renderShop();
+    }
+    if (page === "shop-hub") applyShopHubI18n();
+    if (page === "cart") renderCartPage();
+    if (page === "product") renderProductContent();
+    if (page === "home") {
+      applyHomeCollectionsI18n();
+      renderCollectionGrid();
+      renderFeaturedGrid();
+    }
+  }
+
   /* ---------- Boot ---------- */
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -836,6 +1492,7 @@
 
     var page = document.body.getAttribute("data-page");
     if (page === "home") initHome();
+    if (page === "shop-hub") initShopHub();
     if (page === "shop") initShop();
     if (page === "product") initProduct();
     if (page === "cart") initCart();
@@ -847,24 +1504,20 @@
 
     // Live metal prices arrived after first render — repaint anything showing a price
     document.addEventListener("mahseri:prices-updated", function () {
-      renderCartUI();
-      if (page === "shop") renderShop();
-      if (page === "cart") renderCartPage();
-      if (page === "home") {
-        var grid = document.querySelector("#featured-grid");
-        if (grid) {
-          var featured = MAHSERI_PRODUCTS.slice()
-            .sort(function (a, b) { return (b.badge ? 1 : 0) - (a.badge ? 1 : 0); })
-            .slice(0, 4);
-          grid.innerHTML = featured.map(function (p, i) { return productCard(p, i % 4); }).join("");
-          grid.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("visible"); });
-        }
+      refreshPageContent();
+    });
+
+    document.addEventListener("mahseri:lang-changed", function () {
+      var drawer = document.querySelector(".cart-drawer");
+      if (drawer) {
+        var head = drawer.querySelector(".drawer-head h3");
+        if (head) head.textContent = t("yourBag");
+        var subLabel = drawer.querySelector(".drawer-total span:first-child");
+        if (subLabel) subLabel.textContent = t("subtotal");
+        var checkout = drawer.querySelector(".drawer-foot .btn");
+        if (checkout) checkout.textContent = t("reviewCheckout");
       }
-      if (page === "product") {
-        var id = new URLSearchParams(location.search).get("id");
-        var product = getProduct(id) || MAHSERI_PRODUCTS[0];
-        if (product) setText("#pd-price", formatPrice(product.price));
-      }
+      refreshPageContent();
     });
   });
 })();

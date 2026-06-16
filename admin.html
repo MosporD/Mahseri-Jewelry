@@ -60,6 +60,41 @@
     .btn-sm.outline { background: #fff; color: #1d1d1d; }
     .btn-sm.gold { background: #c6a35c; border-color: #c6a35c; color: #fff; }
     .btn-sm:hover { opacity: 0.88; }
+    .lang-section { border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 0.9rem 1rem; margin-bottom: 0.9rem; background: #faf8f4; }
+    .lang-section h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.75rem; opacity: 0.65; font-weight: 500; }
+    .lang-section[dir="rtl"] textarea, .lang-section[dir="rtl"] input { text-align: right; }
+    .admin-table .name-ar { display: block; font-size: 0.78rem; opacity: 0.65; margin-top: 0.15rem; direction: rtl; }
+    .spot-status { font-size: 0.78rem; opacity: 0.75; margin-bottom: 0.75rem; }
+    .spot-status.live { color: #1a7a4a; opacity: 1; }
+    .spot-status.fallback { color: #8a6c33; opacity: 1; }
+    .spot-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+    .rates-grid .derived { font-size: 0.72rem; opacity: 0.55; margin-top: 0.2rem; }
+    .admin-form.is-editing { border-color: #c6a35c; box-shadow: 0 0 0 2px rgba(198,163,92,0.35), 0 8px 28px rgba(0,0,0,0.08); }
+    .admin-table tr.is-editing-row { background: rgba(198,163,92,0.1); }
+    .admin-table tr.is-editing-row td { border-bottom-color: rgba(198,163,92,0.35); }
+    .bulk-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.25rem 1.4rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); margin-bottom: 1.75rem; }
+    .bulk-card h2 { font-size: 1.2rem; margin: 0 0 0.35rem; }
+    .bulk-card .hint { font-size: 0.82rem; opacity: 0.72; line-height: 1.5; margin: 0 0 1rem; }
+    .bulk-defaults { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; padding: 0.85rem; background: #faf8f4; border-radius: 10px; border: 1px solid rgba(0,0,0,0.06); }
+    .bulk-defaults label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.65; margin-bottom: 0.25rem; }
+    .bulk-defaults select, .bulk-defaults input { width: 100%; font: inherit; font-size: 0.85rem; padding: 0.45rem 0.55rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 6px; box-sizing: border-box; }
+    .bulk-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
+    .bulk-actions input[type=file] { display: none; }
+    .bulk-actions label.file-btn { font-size: 0.78rem; padding: 0.45rem 0.85rem; border-radius: 6px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }
+    .bulk-actions label.file-btn:hover { border-color: #c6a35c; color: #8a6c33; }
+    .bulk-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; }
+    .bulk-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 1100px; }
+    .bulk-table th, .bulk-table td { padding: 0.45rem 0.4rem; border-bottom: 1px solid rgba(0,0,0,0.07); vertical-align: top; }
+    .bulk-table th { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.6; position: sticky; top: 0; background: #fff; z-index: 1; }
+    .bulk-table input, .bulk-table select, .bulk-table textarea { width: 100%; font: inherit; font-size: 0.8rem; padding: 0.35rem 0.45rem; border: 1px solid rgba(0,0,0,0.18); border-radius: 5px; box-sizing: border-box; }
+    .bulk-table textarea { min-height: 2.6rem; resize: vertical; }
+    .bulk-table .bulk-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; background: #f4f1ea; display: block; }
+    .bulk-table .bulk-price { font-size: 0.75rem; white-space: nowrap; opacity: 0.8; padding-top: 0.5rem; }
+    .bulk-table button { font: inherit; font-size: 0.72rem; padding: 0.25rem 0.5rem; border-radius: 5px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }
+    .bulk-table button:hover { border-color: #c0392b; color: #c0392b; }
+    .bulk-empty { padding: 1.5rem; text-align: center; opacity: 0.55; font-size: 0.86rem; }
+    .bulk-foot { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.85rem; align-items: center; }
+    .bulk-count { font-size: 0.8rem; opacity: 0.7; margin-right: auto; }
   </style>
 </head>
 <body data-page="admin">
@@ -81,6 +116,8 @@
       </div>
       <div class="admin-actions">
         <a class="btn-sm outline" href="index.html" style="text-decoration:none; display:inline-flex; align-items:center">View site</a>
+        <button class="btn-sm outline" id="btn-download-schedule">Download cron schedule</button>
+        <button class="btn-sm outline" id="btn-post-all-telegram">Post all to channel</button>
         <button class="btn-sm outline" id="btn-reset">Reset to original</button>
         <button class="btn-sm gold" id="btn-export">Download data.js</button>
       </div>
@@ -91,23 +128,118 @@
       immediately on this device. To publish your changes for all visitors, click
       <strong>Download data.js</strong> and replace the <code>js/data.js</code> file on your
       website host (or in your GitHub repository), then redeploy.
+      For <strong>hourly Telegram posts</strong>, tick
+      <em>Post to channel every hour</em> on each piece, save, then
+      <strong>Download cron schedule</strong> and place
+      <code>telegram-scheduled-products.json</code> in the <code>scripts/</code> folder
+      on the PC that runs the hourly task.
     </div>
 
     <div class="rates-card">
-      <h2>Metal rates</h2>
+      <h2>Live metal pricing</h2>
       <p class="hint">
-        Price per gram, in JOD. New and edited pieces are priced automatically
-        from their <strong>weight &times; the rate for their metal</strong> (plus any
-        making fee). Update these whenever the gold or silver price moves.
+        Piece prices use the formulas in <code>js/pricing.js</code> with live gold and
+        silver spot prices (plus any making fee). Rates below update automatically when
+        spot prices refresh.
       </p>
+      <p class="spot-status" id="spot-status">Loading live metal prices…</p>
       <div class="rates-grid" id="rates-grid"></div>
+      <div class="spot-actions">
+        <button type="button" class="btn-sm outline" id="btn-refresh-spot">Refresh spot prices</button>
+      </div>
+      <details style="margin-top:1rem; font-size:0.82rem;">
+        <summary style="cursor:pointer; opacity:0.75;">Fallback rates (used when live prices are unavailable)</summary>
+        <div class="rates-grid" id="fallback-rates-grid" style="margin-top:0.75rem;"></div>
+      </details>
+    </div>
+
+    <div class="bulk-card" id="bulk-import-card">
+      <h2>Bulk import</h2>
+      <p class="hint">
+        Add many pieces at once. Use the
+        <a href="assets/products/mahseri-products-template.csv" download>CSV template</a>
+        (same as <strong>Download CSV template</strong>) — all original columns included.
+        Fill the <strong>image</strong> column with a path, <em>or</em> leave it empty and name the
+        photo file like the product in <code>assets/products/&lt;type&gt;/</code>.
+        See <code>assets/products/README.txt</code>.
+      </p>
+      <div class="bulk-defaults">
+        <div>
+          <label for="bulk-def-collection">Default collection</label>
+          <select id="bulk-def-collection">
+            <option value="gold">Gold</option>
+            <option value="silver">Silver</option>
+            <option value="gems">Gems</option>
+          </select>
+        </div>
+        <div>
+          <label for="bulk-def-category">Default category</label>
+          <select id="bulk-def-category"></select>
+        </div>
+        <div>
+          <label for="bulk-def-material">Default metal</label>
+          <select id="bulk-def-material">
+            <option>21K Gold</option>
+            <option>18K Gold</option>
+            <option>925 Silver</option>
+          </select>
+        </div>
+        <div>
+          <label for="bulk-def-gender">Default gender</label>
+          <select id="bulk-def-gender">
+            <option value="Her">Her</option>
+            <option value="Him">Him</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+        <div>
+          <label for="bulk-def-making">Default making fee</label>
+          <input id="bulk-def-making" type="number" min="0" step="1" value="0" />
+        </div>
+      </div>
+      <div class="bulk-actions">
+        <label class="file-btn" for="bulk-img-files">Upload photos (multiple)</label>
+        <input id="bulk-img-files" type="file" accept="image/*" multiple />
+        <label class="file-btn" for="bulk-data-file">Import CSV / JSON</label>
+        <input id="bulk-data-file" type="file" accept=".csv,.json,text/csv,application/json" />
+        <button type="button" class="btn-sm outline" id="btn-bulk-template">Download CSV template</button>
+        <button type="button" class="btn-sm outline" id="btn-bulk-add-row">Add empty row</button>
+        <button type="button" class="btn-sm outline" id="btn-bulk-clear">Clear all rows</button>
+      </div>
+      <div class="bulk-wrap">
+        <table class="bulk-table" id="bulk-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Name *</th>
+              <th>الاسم</th>
+              <th>Description</th>
+              <th>Weight (g)</th>
+              <th>Collection</th>
+              <th>Category</th>
+              <th>Metal</th>
+              <th>Gender</th>
+              <th>Image path / URL</th>
+              <th>Price</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="bulk-rows">
+            <tr><td colspan="12" class="bulk-empty">No draft rows yet — upload photos or import a file.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="bulk-foot">
+        <span class="bulk-count" id="bulk-count">0 pieces ready</span>
+        <button type="button" class="btn-sm gold" id="btn-bulk-import">Add all to catalogue</button>
+      </div>
     </div>
 
     <div class="admin-grid">
       <div>
         <table class="admin-table">
           <thead>
-            <tr><th class="thumb-cell"></th><th>Piece</th><th>Category</th><th>Metal</th><th>Price</th><th></th></tr>
+            <tr><th class="thumb-cell"></th><th>Piece</th><th>Category</th><th>Metal</th><th>Price</th><th>Stock</th><th>Hourly</th><th></th></tr>
           </thead>
           <tbody id="product-rows"></tbody>
         </table>
@@ -116,19 +248,40 @@
       <form class="admin-form" id="product-form">
         <h2 id="form-title">Add a new piece</h2>
         <input type="hidden" id="f-id" />
+        <div class="lang-section" lang="en">
+          <h3>English</h3>
+          <div class="field">
+            <label for="f-name">Name</label>
+            <input id="f-name" required />
+          </div>
+          <div class="field">
+            <label for="f-desc">Description</label>
+            <textarea id="f-desc" rows="4" required></textarea>
+          </div>
+        </div>
+        <div class="lang-section" lang="ar" dir="rtl">
+          <h3>العربية</h3>
+          <div class="field">
+            <label for="f-name-ar">الاسم</label>
+            <input id="f-name-ar" />
+          </div>
+          <div class="field">
+            <label for="f-desc-ar">الوصف</label>
+            <textarea id="f-desc-ar" rows="4"></textarea>
+          </div>
+        </div>
         <div class="field">
-          <label for="f-name">Name</label>
-          <input id="f-name" required />
+          <label for="f-collection">Shop collection</label>
+          <select id="f-collection">
+            <option value="gold">Gold</option>
+            <option value="silver">Silver</option>
+            <option value="gems">Gems</option>
+          </select>
         </div>
         <div class="row-2">
           <div class="field">
-            <label for="f-category">Category</label>
-            <select id="f-category">
-              <option>Necklaces</option>
-              <option>Rings</option>
-              <option>Bracelets</option>
-              <option>Earrings</option>
-            </select>
+            <label for="f-category" id="f-category-label">Category</label>
+            <select id="f-category"></select>
           </div>
           <div class="field">
             <label for="f-material">Metal</label>
@@ -172,7 +325,41 @@
               <option value="pendant">Pendant</option>
               <option value="earrings">Earrings</option>
               <option value="bangle">Bangle / Cuff</option>
+              <option value="brooch">Brooch</option>
+              <option value="nose">Nose Jewellery</option>
+              <option value="anklet">Anklet</option>
+              <option value="legchain">Leg Chain</option>
+              <option value="navel">Navel Ring</option>
+              <option value="gemstone">Precious Stone</option>
+              <option value="fullset">Full Set</option>
+              <option value="halfset">Half Set</option>
+              <option value="set3">3 Piece Set</option>
             </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-gender">Gender</label>
+          <select id="f-gender">
+            <option value="Her">Her</option>
+            <option value="Him">Him</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><input type="checkbox" id="f-in-stock" checked /> In stock (shown on site &amp; Telegram)</label>
+        </div>
+        <div class="field">
+          <label><input type="checkbox" id="f-telegram-schedule" /> Post to channel every hour (cron / Task Scheduler)</label>
+        </div>
+        <div class="lang-section" lang="en">
+          <h3>Telegram channel post</h3>
+          <div class="field">
+            <label for="f-telegram-headline">Promotional header</label>
+            <input id="f-telegram-headline" placeholder="e.g. NEW ARRIVAL — limited pieces" />
+          </div>
+          <div class="field">
+            <label for="f-telegram-blurb">Quick description (optional — uses main description if empty)</label>
+            <textarea id="f-telegram-blurb" rows="2" placeholder="Short line for the channel post"></textarea>
           </div>
         </div>
         <div class="field img-field">
@@ -187,19 +374,18 @@
           </div>
           <input id="f-image" placeholder="…or paste an image URL" />
         </div>
-        <div class="field">
-          <label for="f-desc">Description</label>
-          <textarea id="f-desc" rows="4" required></textarea>
-        </div>
         <div class="form-actions">
           <button class="btn-sm gold" type="submit" id="btn-save">Add piece</button>
+          <button class="btn-sm outline" type="button" id="btn-post-telegram" style="display:none">Post to channel</button>
           <button class="btn-sm outline" type="button" id="btn-cancel" style="display:none">Cancel edit</button>
         </div>
       </form>
     </div>
   </div>
 
-  <script src="js/data.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/data.js?v=6"></script>
+  <script src="js/pricing.js?v=7"></script>
+  <script src="js/telegram-catalog.js?v=1"></script>
+  <script src="js/admin.js?v=13"></script>
 </body>
 </html>
