@@ -251,10 +251,10 @@ const MAHSERI_NOTIFY = {
     }
   },
   emailjs: {
-    enabled: false,
-    publicKey: "PASTE_PUBLIC_KEY_HERE",
-      serviceId: "PASTE_SERVICE_ID_HERE",
-      templateId: "PASTE_TEMPLATE_ID_HERE"
+    enabled: true,
+    publicKey: "Qzlv3YiOFEdma-qKK",
+      serviceId: "service_0cdrg8n",
+      templateId: "template_wt1mexr"
   }
 };
 
