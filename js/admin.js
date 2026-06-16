@@ -28,6 +28,8 @@
   var liveSpot = null;     // { gold24, silver, xauUsd, xagUsd, ts } from pricing.js
   var bulkDrafts = [];     // staged rows for bulk import
   var bulkKeySeq = 0;
+  var skuSeq = 0;
+  var productFilter = "";
 
   function setAutoPrice(on) {
     autoPrice = !!on;
@@ -41,6 +43,35 @@
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function normalizeSku(raw) {
+    var m = String(raw || "").trim().toUpperCase().match(/^SKU-(\d+)$/);
+    if (!m) return "";
+    return "SKU-" + String(parseInt(m[1], 10)).padStart(4, "0");
+  }
+
+  function nextSku() {
+    skuSeq += 1;
+    return "SKU-" + String(skuSeq).padStart(4, "0");
+  }
+
+  function ensureProductSku(p) {
+    var normalized = normalizeSku(p && p.sku);
+    if (normalized) {
+      var n = parseInt(normalized.split("-")[1], 10);
+      if (n > skuSeq) skuSeq = n;
+      return normalized;
+    }
+    return nextSku();
+  }
+
+  function syncProductSkus() {
+    products = products.map(function (p) {
+      var out = Object.assign({}, p);
+      out.sku = ensureProductSku(out);
+      return out;
     });
   }
 
@@ -419,6 +450,7 @@
     return Object.assign({
       _key: "bulk-" + bulkKeySeq,
       name: "",
+      sku: "",
       name_ar: "",
       description: "",
       description_ar: "",
@@ -542,7 +574,8 @@
     if (!out.image && out.picture) out.image = out.picture;
     if (!out.weight && out.grams) out.weight = out.grams;
     if (!out.making_fee && out.makingfee) out.making_fee = out.makingfee;
-  if (!out.in_stock && out.instock) out.in_stock = out.instock;
+    if (!out.in_stock && out.instock) out.in_stock = out.instock;
+    if (!out.sku && out.product_sku) out.sku = out.product_sku;
     return out;
   }
 
@@ -577,6 +610,7 @@
     else inStock = true;
     var draft = newBulkDraft({
       name: rec.name || rec.title || "",
+      sku: rec.sku || "",
       name_ar: rec.name_ar || "",
       description: rec.description || "",
       description_ar: rec.description_ar || "",
@@ -609,9 +643,9 @@
       .then(saveCsv)
       .catch(function () {
         saveCsv([
-          "name,name_ar,description,description_ar,weight,collection,category,material,gender,image,making_fee,badge,in_stock",
-          "Example Ring,,Edit description in admin.,,8,gold,Rings,21K Gold,Her,assets/Products/gold/rings/Example Ring.jpg,0,,true",
-          "Example Bracelet,,Edit description in admin.,,40,gold,Bracelets,21K Gold,Her,assets/Products/gold/bracelets/Example Bracelet.jpg,0,,true"
+          "name,sku,name_ar,description,description_ar,weight,collection,category,material,gender,image,making_fee,badge,in_stock",
+          "Example Ring,SKU-0001,,Edit description in admin.,,8,gold,Rings,21K Gold,Her,assets/Products/gold/rings/Example Ring.jpg,0,,true",
+          "Example Bracelet,SKU-0002,,Edit description in admin.,,40,gold,Bracelets,21K Gold,Her,assets/Products/gold/bracelets/Example Bracelet.jpg,0,,true"
         ].join("\n"));
       });
   }
@@ -632,6 +666,7 @@
     var collection = draft.collection || inferCollection({ category: category, material: draft.material });
     return {
       id: uniqueProductId(draft.name),
+      sku: normalizeSku(draft.sku) || nextSku(),
       name: draft.name.trim(),
       name_ar: (draft.name_ar || "").trim(),
       collection: collection,
@@ -783,7 +818,12 @@
   /* ---------- Table ---------- */
 
   function render() {
-    var rows = products.map(function (p) {
+    var q = productFilter.trim().toLowerCase();
+    var list = !q ? products : products.filter(function (p) {
+      var hay = [p.sku, p.id, p.name, p.name_ar, p.category, p.material].join(" ").toLowerCase();
+      return hay.indexOf(q) > -1;
+    });
+    var rows = list.map(function (p) {
       var thumb = p.image
         ? '<img class="thumb" src="' + esc(p.image) + '" alt="" loading="lazy" />'
         : '<span class="thumb"></span>';
@@ -791,6 +831,7 @@
         '<tr data-id="' + esc(p.id) + '">' +
         '<td class="thumb-cell">' + thumb + "</td>" +
         "<td><strong>" + esc(p.name) + "</strong>" +
+        (p.sku ? '<span class="name-ar" dir="ltr">' + esc(p.sku) + "</span>" : "") +
         (p.name_ar ? '<span class="name-ar">' + esc(p.name_ar) + "</span>" : "") +
         (p.badge ? ' <span class="pill">' + esc(p.badge) + "</span>" : "") + "</td>" +
         "<td>" + esc(p.category) + "</td>" +
@@ -806,7 +847,7 @@
       );
     }).join("");
     $("#product-rows").innerHTML =
-      rows || '<tr><td colspan="8" style="opacity:0.6">No pieces yet — add your first one.</td></tr>';
+      rows || '<tr><td colspan="8" style="opacity:0.6">No matching pieces.</td></tr>';
   }
 
   function highlightEditingRow(id) {
@@ -824,6 +865,7 @@
     $("#form-title").textContent = "Edit: " + p.name;
     $("#btn-save").textContent = "Save changes";
     $("#btn-cancel").style.display = "";
+    if ($("#f-sku")) $("#f-sku").value = p.sku || "";
     $("#f-name").value = p.name || "";
     $("#f-name-ar").value = p.name_ar || "";
     if ($("#f-collection")) $("#f-collection").value = inferCollection(p);
@@ -861,6 +903,7 @@
     var form = $("#product-form");
     if (form) form.reset();
     if ($("#f-making")) $("#f-making").value = 0;
+    if ($("#f-sku")) $("#f-sku").value = "";
     $("#form-title").textContent = "Add a new piece";
     $("#btn-save").textContent = "Add piece";
     $("#btn-cancel").style.display = "none";
@@ -1027,6 +1070,7 @@
   /* ---------- Events ---------- */
 
   document.addEventListener("DOMContentLoaded", function () {
+    syncProductSkus();
     initGate();
     populateCategories();
     populateBulkDefaultCategories();
@@ -1266,6 +1310,7 @@
          (e.g. gender, name_ar) are preserved. */
       var entry = Object.assign({}, existing, {
         id: editingId || slugify($("#f-name").value),
+        sku: normalizeSku($("#f-sku") ? $("#f-sku").value : "") || (existing && existing.sku) || nextSku(),
         name: $("#f-name").value.trim(),
         name_ar: $("#f-name-ar").value.trim(),
         collection: $("#f-collection").value,
@@ -1301,6 +1346,11 @@
       persist();
       render();
       resetForm();
+    });
+
+    on("#product-search", "input", function () {
+      productFilter = $("#product-search") ? $("#product-search").value : "";
+      render();
     });
 
     on("#btn-cancel", "click", resetForm);

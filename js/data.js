@@ -6,6 +6,7 @@
 const MAHSERI_PRODUCTS = [
   {
     id: "flower-oval-rolo-bracelet",
+    sku: "SKU-0001",
     name: "Gold Bracelet — edit name",
     collection: "gold",
     category: "Bracelets",
@@ -22,6 +23,7 @@ const MAHSERI_PRODUCTS = [
   },
   {
     id: "gold-half-lira-bracelet-paper-clip",
+    sku: "SKU-0002",
     name: "Gold Bracelet — edit name",
     collection: "gold",
     category: "Bracelets",
@@ -38,6 +40,7 @@ const MAHSERI_PRODUCTS = [
   },
   {
     id: "gold-quarter-lira-bracelet-paper-clip",
+    sku: "SKU-0003",
     name: "Gold Bracelet — edit name",
     collection: "gold",
     category: "Bracelets",
@@ -54,6 +57,7 @@ const MAHSERI_PRODUCTS = [
   },
   {
     id: "oval-rolo-bracelet",
+    sku: "SKU-0004",
     name: "Gold Bracelet — edit name",
     collection: "gold",
     category: "Bracelets",
@@ -70,6 +74,7 @@ const MAHSERI_PRODUCTS = [
   },
   {
     id: "stacked-gold-half-liras-bracelet",
+    sku: "SKU-0005",
     name: "Gold Bracelet — edit name",
     collection: "gold",
     category: "Bracelets",
@@ -86,6 +91,7 @@ const MAHSERI_PRODUCTS = [
   },
   {
     id: "stacked-gold-liras-bracelet",
+    sku: "SKU-0006",
     name: "Gold Bracelet — edit name",
     collection: "gold",
     category: "Bracelets",
@@ -102,6 +108,7 @@ const MAHSERI_PRODUCTS = [
   },
   {
     id: "stacked-gold-quarter-liras-bracelet",
+    sku: "SKU-0007",
     name: "Gold Bracelet — edit name",
     collection: "gold",
     category: "Bracelets",

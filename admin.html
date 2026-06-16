@@ -13,6 +13,8 @@
   <style>
     .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
     .admin-head { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .admin-list-tools { margin: 0 0 0.9rem; }
+    .admin-list-tools input { width: 100%; max-width: 360px; font: inherit; font-size: 0.88rem; padding: 0.5rem 0.65rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 7px; }
     .admin-head h1 { font-size: 2rem; margin: 0; }
     .admin-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
     .admin-note { background: rgba(198,163,92,0.12); border: 1px solid rgba(198,163,92,0.4); border-radius: 8px; padding: 0.85rem 1.1rem; font-size: 0.86rem; line-height: 1.5; margin-bottom: 1.75rem; }
@@ -237,6 +239,9 @@
 
     <div class="admin-grid">
       <div>
+        <div class="admin-list-tools">
+          <input id="product-search" placeholder="Search by SKU, name, or ID" />
+        </div>
         <table class="admin-table">
           <thead>
             <tr><th class="thumb-cell"></th><th>Piece</th><th>Category</th><th>Metal</th><th>Price</th><th>Stock</th><th>Hourly</th><th></th></tr>
@@ -248,6 +253,10 @@
       <form class="admin-form" id="product-form">
         <h2 id="form-title">Add a new piece</h2>
         <input type="hidden" id="f-id" />
+        <div class="field">
+          <label for="f-sku">SKU</label>
+          <input id="f-sku" readonly placeholder="Auto-generated (SKU-0001)" />
+        </div>
         <div class="lang-section" lang="en">
           <h3>English</h3>
           <div class="field">
