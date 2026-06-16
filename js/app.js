@@ -893,6 +893,64 @@
     applyHomeCollectionsI18n();
     renderCollectionGrid();
     renderFeaturedGrid();
+    var heroViewer = document.querySelector("#hero-viewer");
+    if (heroViewer) {
+      var heroCardText = document.querySelector("#hero-card-text");
+      var heroDots = document.querySelector("#hero-dots");
+      var heroPrev = document.querySelector("#hero-prev");
+      var heroNext = document.querySelector("#hero-next");
+      var heroProducts = MAHSERI_PRODUCTS.slice(0, 6);
+      if (!heroProducts.length) heroProducts = MAHSERI_PRODUCTS.slice(0, 1);
+      heroViewer.innerHTML = heroProducts.map(function (p, idx) {
+        var media = p.image
+          ? '<img src="' + encodeImagePath(p.image) + '" alt="' + pName(p) + '"/>'
+          : '<div class="art">' + artFor(p) + '</div>';
+        return (
+          '<a class="hero-slide' + (idx === 0 ? " active" : "") + '" href="product.html?id=' + encodeURIComponent(p.id) + '">' +
+          media +
+          "</a>"
+        );
+      }).join("");
+      if (heroDots) {
+        heroDots.innerHTML = heroProducts.map(function (p, idx) {
+          return '<button type="button" data-hero-dot="' + idx + '" aria-label="Show ' + pName(p) + '"' +
+            (idx === 0 ? ' class="active"' : "") + "></button>";
+        }).join("");
+      }
+      var heroSlides = heroViewer.querySelectorAll(".hero-slide");
+      var currentHero = 0;
+      var heroTimer = null;
+      function showHeroSlide(i) {
+        if (!heroSlides.length) return;
+        currentHero = (i + heroSlides.length) % heroSlides.length;
+        heroSlides.forEach(function (s, idx) { s.classList.toggle("active", idx === currentHero); });
+        if (heroDots) {
+          heroDots.querySelectorAll("button").forEach(function (d, idx) {
+            d.classList.toggle("active", idx === currentHero);
+          });
+        }
+        if (heroCardText) {
+          var hp = heroProducts[currentHero];
+          heroCardText.textContent = pName(hp) + " \u00b7 " + labelMaterial(hp.material);
+        }
+      }
+      function restartHeroTimer() {
+        if (heroTimer) clearInterval(heroTimer);
+        heroTimer = setInterval(function () { showHeroSlide(currentHero + 1); }, 5000);
+      }
+      if (heroPrev) heroPrev.addEventListener("click", function () { showHeroSlide(currentHero - 1); restartHeroTimer(); });
+      if (heroNext) heroNext.addEventListener("click", function () { showHeroSlide(currentHero + 1); restartHeroTimer(); });
+      if (heroDots) {
+        heroDots.addEventListener("click", function (e) {
+          var dot = e.target.closest("[data-hero-dot]");
+          if (!dot) return;
+          showHeroSlide(parseInt(dot.getAttribute("data-hero-dot"), 10) || 0);
+          restartHeroTimer();
+        });
+      }
+      showHeroSlide(0);
+      restartHeroTimer();
+    }
     // Gold particles in hero
     var particles = document.querySelector(".particles");
     if (particles) {
@@ -1331,6 +1389,8 @@
     card: "Card — Visa / Mastercard"
   };
   var CONFIRM_DEPOSIT_RATE = 0.4;
+  var DEPOSIT_ALIAS_PRIMARY = "MosporD";
+  var DEPOSIT_ALIAS_SECONDARY = "00962797157007";
 
   function paymentNeedsDeposit(payment) {
     return payment === "cod" || payment === "cliq";
@@ -1339,6 +1399,10 @@
   function paymentDeposit(total, payment) {
     if (!paymentNeedsDeposit(payment)) return 0;
     return Math.round(total * CONFIRM_DEPOSIT_RATE * 100) / 100;
+  }
+
+  function depositPaymentInfoText() {
+    return "Deposit payment aliases: " + DEPOSIT_ALIAS_PRIMARY + " or " + DEPOSIT_ALIAS_SECONDARY + ".";
   }
 
   function orderText(order) {
@@ -1354,6 +1418,7 @@
       "TOTAL: " + formatPrice(order.total),
       order.depositDue > 0 ? "Deposit (40%): " + formatPrice(order.depositDue) : "",
       order.depositDue > 0 ? "Remaining (60%): " + formatPrice(order.balanceDue) : "",
+      order.depositDue > 0 ? depositPaymentInfoText() : "",
       "",
       "Payment: " + (PAYMENT_LABELS[order.payment] || order.payment),
       "Name: " + order.name,
@@ -1403,7 +1468,8 @@
           address: order.address,
           payment_method: PAYMENT_LABELS[order.payment] || order.payment,
           notes: (order.notes || "—") + (order.depositDue > 0
-            ? " | Deposit required: " + formatPrice(order.depositDue) + " (40%), Remaining: " + formatPrice(order.balanceDue)
+            ? " | Deposit required: " + formatPrice(order.depositDue) + " (40%), Remaining: " + formatPrice(order.balanceDue) +
+              ". " + depositPaymentInfoText()
             : ""),
           items_html: itemsHtml,
           subtotal: formatPrice(order.subtotal),
@@ -1494,7 +1560,7 @@
         var due = paymentDeposit(total, pay.value);
         var remain = Math.max(0, total - due);
         noteEl.textContent = "Confirmation deposit due now: " + formatPrice(due) +
-          " (40%). Remaining: " + formatPrice(remain) + ".";
+          " (40%). Remaining: " + formatPrice(remain) + ". " + depositPaymentInfoText();
       } else {
         noteEl.textContent = "";
       }
@@ -1573,7 +1639,8 @@
           : " within working hours to confirm delivery to " + order.city + ".";
         var depositText = order.depositDue > 0
           ? " To confirm your order, please complete the 40% deposit (" + formatPrice(order.depositDue) +
-            "). The remaining 60% (" + formatPrice(order.balanceDue) + ") is due at delivery."
+            "). The remaining 60% (" + formatPrice(order.balanceDue) + ") is due at delivery. " +
+            depositPaymentInfoText()
           : "";
         setText(
           "#order-msg",

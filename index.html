@@ -75,19 +75,15 @@
         </div>
         <div class="hero-visual reveal reveal-delay-1 visible">
           <div class="hero-frame">
-            <div class="art">
-              <svg viewBox="0 0 200 200" fill="none" aria-hidden="true">
-                <path d="M30 32 C45 105 75 130 100 134 C125 130 155 105 170 32" stroke="#d8bc7e" stroke-width="4" stroke-linecap="round"/>
-                <path d="M40 32 C53 98 78 122 100 126 C122 122 147 98 160 32" stroke="rgba(216,188,126,0.45)" stroke-width="1.6"/>
-                <circle cx="100" cy="150" r="14" stroke="#d8bc7e" stroke-width="4"/>
-                <path d="M95 170 L100 182 L105 170" stroke="#d8bc7e" stroke-width="3" stroke-linecap="round"/>
-              </svg>
-            </div>
+            <div class="hero-viewer" id="hero-viewer" aria-live="polite"></div>
+            <button class="hero-nav hero-prev" id="hero-prev" type="button" aria-label="Previous product">&#10094;</button>
+            <button class="hero-nav hero-next" id="hero-next" type="button" aria-label="Next product">&#10095;</button>
+            <div class="hero-dots" id="hero-dots" aria-label="Featured products"></div>
             <div class="hero-shine"></div>
           </div>
           <div class="hero-card">
             <span class="dot"></span>
-            <p>Handcrafted to order &middot; Amman</p>
+            <p id="hero-card-text">Handcrafted to order &middot; Amman</p>
           </div>
         </div>
       </div>
