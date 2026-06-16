@@ -621,6 +621,39 @@
     return path.split("/").map(function (seg) { return encodeURIComponent(seg); }).join("/");
   }
 
+  var SITE_ORIGIN = "https://mahserijewellery.com";
+  var DEFAULT_OG_IMAGE = SITE_ORIGIN + "/assets/standalone/Fullset.jpg";
+
+  function absoluteSiteUrl(path) {
+    return SITE_ORIGIN + "/" + String(path || "").replace(/^\//, "");
+  }
+
+  function absoluteImageUrl(path) {
+    if (!path) return DEFAULT_OG_IMAGE;
+    if (/^https?:\/\//i.test(path)) return path;
+    return absoluteSiteUrl(encodeImagePath(path));
+  }
+
+  function setMetaContent(selector, content) {
+    var el = document.querySelector(selector);
+    if (el && content != null) el.setAttribute("content", content);
+  }
+
+  function updatePageSeo(opts) {
+    if (opts.title) document.title = opts.title;
+    setMetaContent('meta[name="description"]', opts.description);
+    var canon = document.querySelector('link[rel="canonical"]');
+    if (canon && opts.url) canon.setAttribute("href", opts.url);
+    setMetaContent('meta[property="og:title"]', opts.title);
+    setMetaContent('meta[property="og:description"]', opts.description);
+    setMetaContent('meta[property="og:url"]', opts.url);
+    setMetaContent('meta[property="og:image"]', opts.image);
+    if (opts.type) setMetaContent('meta[property="og:type"]', opts.type);
+    setMetaContent('meta[name="twitter:title"]', opts.title);
+    setMetaContent('meta[name="twitter:description"]', opts.description);
+    setMetaContent('meta[name="twitter:image"]', opts.image);
+  }
+
   function productDetailMedia(p) {
     var displayName = pName(p);
     if (p.image) {
@@ -1097,7 +1130,13 @@
     var id = new URLSearchParams(location.search).get("id");
     var product = getProduct(id) || MAHSERI_PRODUCTS[0];
 
-    document.title = pName(product) + " | Mahseri Jewellery";
+    updatePageSeo({
+      title: pName(product) + " | Mahseri Jewellery",
+      description: pDesc(product),
+      url: absoluteSiteUrl("product.html?id=" + encodeURIComponent(product.id)),
+      image: absoluteImageUrl(product.image),
+      type: "product"
+    });
     renderProductMedia(product);
     setText("#pd-category", productTypeLabel(product));
     setText("#pd-name", pName(product));
