@@ -244,7 +244,7 @@ const MAHSERI_NOTIFY = {
     botToken: "8943736269:AAFzqxcT2eYIvanCrmF_svfqtLodaNkxjQg",
     chatId: "5306835048",
     channelId: "-1004372771709",
-    siteUrl: "http://localhost:8000",
+    siteUrl: "https://mahserijewellery.com",
     metalAlerts: {
       enabled: true,
       intervalMinutes: 10
