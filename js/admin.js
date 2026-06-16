@@ -28,6 +28,8 @@
   var liveSpot = null;     // { gold24, silver, xauUsd, xagUsd, ts } from pricing.js
   var bulkDrafts = [];     // staged rows for bulk import
   var bulkKeySeq = 0;
+  var cropper = null;      // Cropper.js instance while modal is open
+  var cropOnDone = null;   // optional callback(dataUrl) after Apply crop
   var skuSeq = 0;
   var productFilter = "";
 
@@ -482,15 +484,18 @@
       return;
     }
     tbody.innerHTML = bulkDrafts.map(function (d, idx) {
+      var hasImg = !!d.image;
       var thumb = d.image
         ? '<img class="bulk-thumb" src="' + esc(adminImageSrc(d.image)) + '" alt="" />'
         : '<span class="bulk-thumb"></span>';
+      var cropBtn = '<button type="button" data-bulk-crop="' + esc(d._key) + '"' +
+        (hasImg ? "" : " disabled") + ' title="Crop photo">Crop</button>';
       var price = bulkDraftPrice(d);
       var imgVal = d.image && d.image.indexOf("data:") === 0 ? "" : (d.image || "");
       var imgPh = "(auto) " + imageFolderForCategory(d.category, d.collection) + (d.name.trim() || "Product Name") + ".jpg";
       return (
         "<tr data-bulk-key=\"" + esc(d._key) + "\">" +
-        "<td>" + thumb + "</td>" +
+        "<td><div class=\"bulk-thumb-wrap\">" + thumb + cropBtn + "</div></td>" +
         "<td><input data-field=\"name\" value=\"" + esc(d.name) + "\" placeholder=\"Piece name\" /></td>" +
         "<td><input data-field=\"name_ar\" value=\"" + esc(d.name_ar) + "\" dir=\"rtl\" /></td>" +
         "<td><textarea data-field=\"description\" rows=\"2\">" + esc(d.description) + "</textarea></td>" +
@@ -771,7 +776,101 @@
     $("#fallback-rates-grid").innerHTML = html;
   }
 
-  /* ---------- Image upload ---------- */
+  /* ---------- Image upload & crop ---------- */
+
+  function updateCropButton() {
+    var btn = $("#f-img-crop");
+    if (btn) btn.disabled = !currentImage;
+  }
+
+  function destroyCropper() {
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+  }
+
+  function closeCropModal() {
+    var modal = $("#crop-modal");
+    if (modal) modal.hidden = true;
+    destroyCropper();
+    cropOnDone = null;
+    var img = $("#crop-target");
+    if (img) {
+      img.removeAttribute("src");
+      img.onload = null;
+      img.onerror = null;
+    }
+  }
+
+  function startCropperOnImage(img) {
+    destroyCropper();
+    if (typeof Cropper === "undefined") {
+      alert("Crop tool failed to load. Check your internet connection and refresh the page.");
+      closeCropModal();
+      return;
+    }
+    cropper = new Cropper(img, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 0.92,
+      responsive: true,
+      movable: true,
+      zoomable: true,
+      scalable: false,
+      rotatable: false
+    });
+  }
+
+  /* Open the square crop editor. onDone receives a JPEG data URL when applied. */
+  function openCropModal(src, onDone) {
+    if (!src) return;
+    cropOnDone = onDone || null;
+    var modal = $("#crop-modal");
+    var img = $("#crop-target");
+    if (!modal || !img) return;
+
+    destroyCropper();
+    modal.hidden = false;
+
+    img.onload = function () {
+      startCropperOnImage(img);
+    };
+    img.onerror = function () {
+      alert("Could not load this image for cropping. Try uploading the file instead of using an external URL.");
+      closeCropModal();
+    };
+    img.src = adminImageSrc(src);
+    if (img.complete && img.naturalWidth) img.onload();
+  }
+
+  function applyCrop() {
+    if (!cropper) return;
+    var canvas;
+    try {
+      canvas = cropper.getCroppedCanvas({
+        width: 900,
+        height: 900,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: "high"
+      });
+    } catch (e) {
+      canvas = null;
+    }
+    if (!canvas) {
+      alert("Could not crop this image. If it is an external URL, upload the file instead.");
+      return;
+    }
+    var url = canvas.toDataURL("image/jpeg", 0.85);
+    var done = cropOnDone;
+    closeCropModal();
+    if (done) {
+      done(url);
+    } else {
+      showImage(url);
+      if ($("#f-image")) $("#f-image").value = "";
+    }
+  }
 
   function showImage(url) {
     currentImage = url || "";
@@ -784,6 +883,7 @@
       preview.removeAttribute("src");
       preview.style.display = "none";
     }
+    updateCropButton();
   }
 
   /* Downscale an uploaded photo to a data URL so it stays small enough for
@@ -1156,6 +1256,18 @@
     });
 
     on("#bulk-rows", "click", function (e) {
+      var cropBtn = e.target.closest("[data-bulk-crop]");
+      if (cropBtn && !cropBtn.disabled) {
+        var cropKey = cropBtn.getAttribute("data-bulk-crop");
+        var cropDraft = bulkDrafts.find(function (d) { return d._key === cropKey; });
+        if (cropDraft && cropDraft.image) {
+          openCropModal(cropDraft.image, function (url) {
+            cropDraft.image = url;
+            renderBulkTable();
+          });
+        }
+        return;
+      }
       var btn = e.target.closest("[data-bulk-remove]");
       if (!btn) return;
       var key = btn.getAttribute("data-bulk-remove");
@@ -1251,22 +1363,33 @@
       if (e.target.id === "price-toggle") setAutoPrice(!autoPrice);
     });
 
-    /* Photo: upload a file, paste a URL, or remove. */
+    /* Photo: upload a file, paste a URL, crop, or remove. */
     on("#f-img-file", "change", function (e) {
       var file = e.target.files && e.target.files[0];
       if (!file) return;
       readImageFile(file, function (url) {
-        showImage(url);
-        if ($("#f-image")) $("#f-image").value = "";
+        openCropModal(url);
       });
       e.target.value = "";
+    });
+    on("#f-img-crop", "click", function () {
+      if (currentImage) openCropModal(currentImage);
     });
     on("#f-image", "input", function () {
       showImage($("#f-image").value.trim());
     });
+    on("#f-image", "change", function () {
+      var url = $("#f-image").value.trim();
+      if (url) openCropModal(url);
+    });
     on("#f-img-remove", "click", function () {
       showImage("");
       if ($("#f-image")) $("#f-image").value = "";
+    });
+    on("#crop-cancel", "click", closeCropModal);
+    on("#crop-apply", "click", applyCrop);
+    on("#crop-modal", "click", function (e) {
+      if (e.target.id === "crop-modal") closeCropModal();
     });
 
     on("#product-rows", "click", function (e) {
