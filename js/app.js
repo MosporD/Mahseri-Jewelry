@@ -1330,6 +1330,16 @@
     whatsapp: "WhatsApp confirmation",
     card: "Card — Visa / Mastercard"
   };
+  var CONFIRM_DEPOSIT_RATE = 0.4;
+
+  function paymentNeedsDeposit(payment) {
+    return payment === "cod" || payment === "cliq";
+  }
+
+  function paymentDeposit(total, payment) {
+    if (!paymentNeedsDeposit(payment)) return 0;
+    return Math.round(total * CONFIRM_DEPOSIT_RATE * 100) / 100;
+  }
 
   function orderText(order) {
     return [
@@ -1342,6 +1352,8 @@
       "Subtotal: " + formatPrice(order.subtotal),
       "Delivery: " + (order.shipping === 0 ? "Free" : formatPrice(order.shipping)),
       "TOTAL: " + formatPrice(order.total),
+      order.depositDue > 0 ? "Deposit (40%): " + formatPrice(order.depositDue) : "",
+      order.depositDue > 0 ? "Remaining (60%): " + formatPrice(order.balanceDue) : "",
       "",
       "Payment: " + (PAYMENT_LABELS[order.payment] || order.payment),
       "Name: " + order.name,
@@ -1390,7 +1402,9 @@
           city: order.city,
           address: order.address,
           payment_method: PAYMENT_LABELS[order.payment] || order.payment,
-          notes: order.notes || "—",
+          notes: (order.notes || "—") + (order.depositDue > 0
+            ? " | Deposit required: " + formatPrice(order.depositDue) + " (40%), Remaining: " + formatPrice(order.balanceDue)
+            : ""),
           items_html: itemsHtml,
           subtotal: formatPrice(order.subtotal),
           shipping: order.shipping === 0 ? "Free" : formatPrice(order.shipping),
@@ -1469,6 +1483,33 @@
 
     var form = document.querySelector("#checkout-form");
     if (!form) return;
+    function refreshDepositNote() {
+      var pay = form.querySelector('input[name="payment"]:checked');
+      var noteEl = document.querySelector("#deposit-note");
+      if (!noteEl) return;
+      var subtotal = cartSubtotal();
+      var shipping = shippingFor(subtotal);
+      var total = subtotal + shipping;
+      if (pay && paymentNeedsDeposit(pay.value)) {
+        var due = paymentDeposit(total, pay.value);
+        var remain = Math.max(0, total - due);
+        noteEl.textContent = "Confirmation deposit due now: " + formatPrice(due) +
+          " (40%). Remaining: " + formatPrice(remain) + ".";
+      } else {
+        noteEl.textContent = "";
+      }
+    }
+    form.querySelectorAll('input[name="payment"]').forEach(function (el) {
+      el.addEventListener("change", refreshDepositNote);
+    });
+    var cartLines = document.querySelector("#cart-lines");
+    if (cartLines) {
+      cartLines.addEventListener("click", function () {
+        setTimeout(refreshDepositNote, 0);
+      });
+    }
+    refreshDepositNote();
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       if (!loadCart().length) { toast(t("bagIsEmpty")); return; }
@@ -1479,6 +1520,8 @@
       var subtotal = cartSubtotal();
       var shipping = shippingFor(subtotal);
       var payment = data.get("payment");
+      var total = subtotal + shipping;
+      var depositDue = paymentDeposit(total, payment);
 
       var order = {
         no: orderNo,
@@ -1496,7 +1539,9 @@
         }),
         subtotal: subtotal,
         shipping: shipping,
-        total: subtotal + shipping
+        total: total,
+        depositDue: depositDue,
+        balanceDue: Math.max(0, total - depositDue)
       };
 
       notifyOrder(order);
@@ -1526,11 +1571,15 @@
         var followUp = payment === "card"
           ? " with a secure card payment link and to confirm delivery to " + order.city + "."
           : " within working hours to confirm delivery to " + order.city + ".";
+        var depositText = order.depositDue > 0
+          ? " To confirm your order, please complete the 40% deposit (" + formatPrice(order.depositDue) +
+            "). The remaining 60% (" + formatPrice(order.balanceDue) + ") is due at delivery."
+          : "";
         setText(
           "#order-msg",
           "Thank you, " + order.name.split(" ")[0] +
           ". Your invoice is on its way to " + order.email +
-          ". Our concierge will contact " + order.phone + followUp
+          ". Our concierge will contact " + order.phone + followUp + depositText
         );
         if (success.scrollIntoView) success.scrollIntoView({ behavior: "smooth", block: "center" });
       }
