@@ -1,41 +1,48 @@
 Mahseri — product photos & CSV template
 =======================================
 
-CSV template (all columns):
-  assets/products/mahseri-products-template.csv
+CSV template:
+  assets/Products/mahseri-products-template.csv
   Or admin → Bulk import → Download CSV template
+
+Photo folders
+-------------
+Gold and silver — one folder per category inside each type:
+
+  assets/Products/gold/bracelets/
+  assets/Products/gold/necklaces/
+  assets/Products/gold/rings/
+  assets/Products/gold/earrings/
+  assets/Products/gold/brooches/
+  assets/Products/gold/nose-jewellery/
+  assets/Products/gold/anklets/
+  assets/Products/gold/leg-chains/
+  assets/Products/gold/navel-rings/
+  assets/Products/gold/full-set/
+  assets/Products/gold/half-set/
+  assets/Products/gold/3-piece-set/
+
+  (same folders under assets/Products/silver/)
+
+Gems — flat folder only:
+
+  assets/Products/gems/
+
+Drop a photo in the matching type + category folder. In admin, set
+collection to gold, silver, or gems — the image path auto-matches.
 
 Two ways to set the photo
 -------------------------
 
-A) Original template — fill the image column:
+A) Fill the image column in CSV:
 
   name,...,image,...
-  Example Ring,...,assets/products/rings/Example Ring.jpg,...
-
-  Old paths still work too, e.g. assets/Pictures/my-photo.jpeg
+  Example Ring,...,assets/Products/gold/rings/Example Ring.jpg,...
 
 B) Auto-match — leave image empty, name the file like the product:
 
   name:     Gold Lira Bracelet
-  file:     assets/products/bracelets/Gold Lira Bracelet.jpg
-
-Category folders
-----------------
-  Bracelets          assets/products/bracelets/
-  Rings              assets/products/rings/
-  Necklaces          assets/products/necklaces/
-  Earrings           assets/products/earrings/
-  Brooches           assets/products/brooches/
-  Nose Jewellery     assets/products/nose-jewellery/
-  Anklets            assets/products/anklets/
-  Leg Chains         assets/products/leg-chains/
-  Navel Rings        assets/products/navel-rings/
-  Full Set           assets/products/full-set/
-  Half Set           assets/products/half-set/
-  3 Piece Set        assets/products/3-piece-set/
-  Gems (Ruby, etc.)   assets/products/gems/
-  Other              assets/products/misc/
+  file:     assets/Products/gold/bracelets/Gold Lira Bracelet.jpg
 
 Template columns
 ----------------
@@ -49,5 +56,5 @@ Template columns
 Tips
 ----
 - Open the CSV in Excel, edit, save as CSV UTF-8, then Import in admin.
-- Delete the two example rows in the template before importing your real products.
 - Match spelling exactly between CSV name and filename when using auto-match.
+- After adding photos, edit names, weights and prices in admin → Download data.js.

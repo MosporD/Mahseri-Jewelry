@@ -213,6 +213,12 @@
 
   function inferCollection(p) {
     if (p && p.collection) return p.collection;
+    if (p && p.image) {
+      var img = String(p.image).toLowerCase();
+      if (img.indexOf("/products/silver/") > -1) return "silver";
+      if (img.indexOf("/products/gems/") > -1) return "gems";
+      if (img.indexOf("/products/gold/") > -1) return "gold";
+    }
     if (p && p.category === "Precious Stones") return "gems";
     if (p && typeof MAHSERI_GEM_TYPES !== "undefined" &&
         MAHSERI_GEM_TYPES.indexOf(p.category) > -1 && p.collection !== "gold" && p.collection !== "silver") {
@@ -265,10 +271,7 @@
     }).join("");
   }
 
-  function imageFolderForCategory(category) {
-    if (typeof MAHSERI_GEM_TYPES !== "undefined" && MAHSERI_GEM_TYPES.indexOf(category) > -1) {
-      return "assets/products/gems/";
-    }
+  function categoryFolderSlug(category) {
     var map = {
       Necklaces: "necklaces",
       Rings: "rings",
@@ -283,8 +286,16 @@
       "Half Set": "half-set",
       "3 Piece Set": "3-piece-set"
     };
-    var slug = map[category];
-    return slug ? "assets/products/" + slug + "/" : "assets/products/misc/";
+    return map[category] || "misc";
+  }
+
+  function imageFolderForCategory(category, collection) {
+    if (collection === "gems" ||
+        (typeof MAHSERI_GEM_TYPES !== "undefined" && MAHSERI_GEM_TYPES.indexOf(category) > -1)) {
+      return "assets/Products/gems/";
+    }
+    var type = collection === "silver" ? "silver" : "gold";
+    return "assets/Products/" + type + "/" + categoryFolderSlug(category) + "/";
   }
 
   var PRODUCT_IMAGE_EXTS = [".jpg", ".jpeg", ".png", ".webp"];
@@ -295,8 +306,8 @@
   }
 
   /* Image file = product name before the extension, in the category folder. */
-  function candidateImagePaths(name, category) {
-    var folder = imageFolderForCategory(category);
+  function candidateImagePaths(name, category, collection) {
+    var folder = imageFolderForCategory(category, collection);
     var stem = String(name || "").trim();
     var slug = productImageSlug(name);
     var paths = [];
@@ -311,15 +322,15 @@
     return paths;
   }
 
-  function resolveProductImagePath(name, category, explicit) {
+  function resolveProductImagePath(name, category, explicit, collection) {
     if (explicit && String(explicit).trim()) return String(explicit).trim();
-    var paths = candidateImagePaths(name, category);
+    var paths = candidateImagePaths(name, category, collection);
     return paths.length ? paths[0] : "";
   }
 
   function applyAutoImageToDraft(draft) {
     if (draft.image && String(draft.image).trim()) return draft;
-    draft.image = resolveProductImagePath(draft.name, draft.category, "");
+    draft.image = resolveProductImagePath(draft.name, draft.category, "", draft.collection);
     return draft;
   }
 
@@ -335,12 +346,12 @@
     }).catch(function () { return null; });
   }
 
-  function resolveProductImagePathAsync(name, category, explicit) {
+  function resolveProductImagePathAsync(name, category, explicit, collection) {
     if (explicit && String(explicit).trim()) {
       var path = String(explicit).trim();
       return probeImageUrl(path).then(function (found) { return found || path; });
     }
-    var paths = candidateImagePaths(name, category);
+    var paths = candidateImagePaths(name, category, collection);
     var i = 0;
     function next() {
       if (i >= paths.length) return Promise.resolve("");
@@ -362,9 +373,9 @@
     var left = pending.length;
     pending.forEach(function (draft) {
       var explicit = draft.image && draft.image.trim() ? draft.image.trim() : "";
-      resolveProductImagePathAsync(draft.name, draft.category, explicit).then(function (url) {
+      resolveProductImagePathAsync(draft.name, draft.category, explicit, draft.collection).then(function (url) {
         if (url) draft.image = url;
-        else if (!explicit) draft.image = resolveProductImagePath(draft.name, draft.category, "");
+        else if (!explicit) draft.image = resolveProductImagePath(draft.name, draft.category, "", draft.collection);
         left--;
         if (left === 0) { renderBulkTable(); if (done) done(); }
       });
@@ -444,7 +455,7 @@
         : '<span class="bulk-thumb"></span>';
       var price = bulkDraftPrice(d);
       var imgVal = d.image && d.image.indexOf("data:") === 0 ? "" : (d.image || "");
-      var imgPh = "(auto) " + imageFolderForCategory(d.category) + (d.name.trim() || "Product Name") + ".jpg";
+      var imgPh = "(auto) " + imageFolderForCategory(d.category, d.collection) + (d.name.trim() || "Product Name") + ".jpg";
       return (
         "<tr data-bulk-key=\"" + esc(d._key) + "\">" +
         "<td>" + thumb + "</td>" +
@@ -593,14 +604,14 @@
       a.remove();
       URL.revokeObjectURL(a.href);
     }
-    fetch("assets/products/mahseri-products-template.csv")
+    fetch("assets/Products/mahseri-products-template.csv")
       .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
       .then(saveCsv)
       .catch(function () {
         saveCsv([
           "name,name_ar,description,description_ar,weight,collection,category,material,gender,image,making_fee,badge,in_stock",
-          "Example Ring,,Hand-made 21K band,,8.1,gold,Rings,21K Gold,Her,assets/products/rings/Example Ring.jpg,0,Signature,true",
-          "Gold Lira Bracelet,,Stacked lira links,,22,gold,Bracelets,21K Gold,Her,,0,Bestseller,true"
+          "Example Ring,,Edit description in admin.,,8,gold,Rings,21K Gold,Her,assets/Products/gold/rings/Example Ring.jpg,0,,true",
+          "Example Bracelet,,Edit description in admin.,,40,gold,Bracelets,21K Gold,Her,assets/Products/gold/bracelets/Example Bracelet.jpg,0,,true"
         ].join("\n"));
       });
   }
@@ -632,7 +643,7 @@
       makingFee: making,
       badge: draft.badge ? draft.badge : null,
       art: inferArt(category),
-      image: resolveProductImagePath(draft.name, category, draft.image),
+      image: resolveProductImagePath(draft.name, category, draft.image, collection),
       description: (draft.description || "").trim(),
       description_ar: (draft.description_ar || "").trim(),
       inStock: draft.inStock !== false,
@@ -658,7 +669,7 @@
       if (!confirm(
         dataUrlCount + " rows use uploaded photos stored as data in the browser. " +
         "Too many can exceed storage limits. Continue anyway?\n\n" +
-        "Tip: put files in assets/products/&lt;type&gt;/ (see assets/products/README.txt) and use paths in the Image column instead."
+        "Tip: put files in assets/Products/&lt;gold|silver&gt;/&lt;category&gt;/ (see assets/Products/README.txt) and use paths in the Image column instead."
       )) return;
     }
     valid.forEach(function (draft) {
@@ -1061,7 +1072,7 @@
         var dImg = bulkDrafts.find(function (x) { return x._key === row.getAttribute("data-bulk-key"); });
         if (dImg && (!dImg.image || dImg.image.indexOf("data:") !== 0)) {
           applyAutoImageToDraft(dImg);
-          resolveProductImagePathAsync(dImg.name, dImg.category, "").then(function (url) {
+          resolveProductImagePathAsync(dImg.name, dImg.category, "", dImg.collection).then(function (url) {
             if (url) dImg.image = url;
             renderBulkTable();
           });
@@ -1092,7 +1103,7 @@
         var dImg2 = bulkDrafts.find(function (x) { return x._key === row.getAttribute("data-bulk-key"); });
         if (dImg2 && (!dImg2.image || dImg2.image.indexOf("data:") !== 0)) {
           applyAutoImageToDraft(dImg2);
-          resolveProductImagePathAsync(dImg2.name, dImg2.category, "").then(function (url) {
+          resolveProductImagePathAsync(dImg2.name, dImg2.category, "", dImg2.collection).then(function (url) {
             if (url) dImg2.image = url;
             renderBulkTable();
           });
@@ -1269,7 +1280,8 @@
         image: currentImage || resolveProductImagePath(
           $("#f-name").value.trim(),
           $("#f-category").value,
-          $("#f-image") ? $("#f-image").value.trim() : ""
+          $("#f-image") ? $("#f-image").value.trim() : "",
+          $("#f-collection").value
         ),
         description: $("#f-desc").value.trim(),
         description_ar: $("#f-desc-ar").value.trim(),
