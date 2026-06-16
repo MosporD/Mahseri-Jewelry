@@ -462,31 +462,89 @@
     var toggle = document.querySelector(".menu-toggle");
     var nav = document.querySelector(".site-nav");
     if (toggle && nav) {
-      toggle.addEventListener("click", function () {
-        var open = nav.classList.toggle("open");
+      var backdrop = document.querySelector(".nav-backdrop");
+      if (!backdrop) {
+        backdrop = document.createElement("div");
+        backdrop.className = "nav-backdrop";
+        backdrop.setAttribute("aria-hidden", "true");
+        document.body.appendChild(backdrop);
+      }
+
+      var touchStartX = 0;
+      var touchDeltaX = 0;
+      var dragging = false;
+      var scrollY = 0;
+
+      function setNavOpen(open) {
+        if (open) {
+          scrollY = window.scrollY;
+          document.body.style.top = "-" + scrollY + "px";
+        } else {
+          document.body.style.top = "";
+          window.scrollTo(0, scrollY);
+        }
+        nav.classList.toggle("open", open);
         toggle.classList.toggle("open", open);
         document.body.classList.toggle("nav-open", open);
+        backdrop.classList.toggle("visible", open);
+        nav.classList.remove("dragging");
+        nav.style.transform = "";
         toggle.setAttribute("aria-expanded", open ? "true" : "false");
         toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      }
+
+      function closeNav() { setNavOpen(false); }
+
+      toggle.addEventListener("click", function () {
+        setNavOpen(!nav.classList.contains("open"));
       });
+      backdrop.addEventListener("click", closeNav);
       nav.querySelectorAll("a").forEach(function (a) {
-        a.addEventListener("click", function () {
-          nav.classList.remove("open");
-          toggle.classList.remove("open");
-          document.body.classList.remove("nav-open");
-          toggle.setAttribute("aria-expanded", "false");
-          toggle.setAttribute("aria-label", "Open menu");
-        });
+        a.addEventListener("click", closeNav);
       });
-      document.addEventListener("click", function (e) {
+
+      nav.addEventListener("touchstart", function (e) {
         if (!nav.classList.contains("open")) return;
-        if (nav.contains(e.target) || toggle.contains(e.target)) return;
-        nav.classList.remove("open");
-        toggle.classList.remove("open");
-        document.body.classList.remove("nav-open");
-        toggle.setAttribute("aria-expanded", "false");
-        toggle.setAttribute("aria-label", "Open menu");
-      });
+        touchStartX = e.touches[0].clientX;
+        touchDeltaX = 0;
+        dragging = true;
+        nav.classList.add("dragging");
+      }, { passive: true });
+
+      nav.addEventListener("touchmove", function (e) {
+        if (!dragging) return;
+        touchDeltaX = Math.max(0, e.touches[0].clientX - touchStartX);
+        nav.style.transform = "translateX(" + touchDeltaX + "px)";
+      }, { passive: true });
+
+      function endNavDrag() {
+        if (!dragging) return;
+        dragging = false;
+        nav.classList.remove("dragging");
+        if (touchDeltaX > 72) closeNav();
+        else nav.style.transform = "";
+        touchDeltaX = 0;
+      }
+
+      nav.addEventListener("touchend", endNavDrag, { passive: true });
+      nav.addEventListener("touchcancel", endNavDrag, { passive: true });
+
+      backdrop.addEventListener("touchstart", function (e) {
+        if (!nav.classList.contains("open")) return;
+        touchStartX = e.touches[0].clientX;
+        touchDeltaX = 0;
+        dragging = true;
+      }, { passive: true });
+
+      backdrop.addEventListener("touchmove", function (e) {
+        if (!dragging) return;
+        touchDeltaX = Math.max(0, e.touches[0].clientX - touchStartX);
+        nav.classList.add("dragging");
+        nav.style.transform = "translateX(" + touchDeltaX + "px)";
+      }, { passive: true });
+
+      backdrop.addEventListener("touchend", endNavDrag, { passive: true });
+      backdrop.addEventListener("touchcancel", endNavDrag, { passive: true });
     }
 
     // Highlight current page in nav
