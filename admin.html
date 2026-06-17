@@ -12,15 +12,16 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
   <style>
-    .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
+    .admin-wrap { max-width: 1400px; margin: 0 auto; padding: 2rem 1.25rem 5rem; display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 1.4rem 2rem; align-items: start; }
     .admin-head { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
     .admin-list-tools { margin: 0 0 0.9rem; }
     .admin-list-tools input { width: 100%; max-width: 360px; font: inherit; font-size: 0.88rem; padding: 0.5rem 0.65rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 7px; }
     .admin-head h1 { font-size: 2rem; margin: 0; }
     .admin-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-    .admin-note { background: rgba(198,163,92,0.12); border: 1px solid rgba(198,163,92,0.4); border-radius: 8px; padding: 0.85rem 1.1rem; font-size: 0.86rem; line-height: 1.5; margin-bottom: 1.75rem; }
-    .admin-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem; align-items: start; }
-    @media (max-width: 880px) { .admin-grid { grid-template-columns: 1fr; } }
+    .admin-head, .admin-note { grid-column: 1 / -1; }
+    .admin-note { background: rgba(198,163,92,0.12); border: 1px solid rgba(198,163,92,0.4); border-radius: 8px; padding: 0.85rem 1.1rem; font-size: 0.86rem; line-height: 1.5; }
+    .admin-grid { display: contents; }
+    .admin-grid > div { grid-column: 1; min-width: 0; }
     .admin-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
     .admin-table th, .admin-table td { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 1px solid rgba(0,0,0,0.08); vertical-align: middle; }
     .admin-table th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.65; }
@@ -28,7 +29,7 @@
     .admin-table button { font: inherit; font-size: 0.78rem; padding: 0.3rem 0.7rem; border-radius: 6px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }
     .admin-table button:hover { border-color: #c6a35c; color: #8a6c33; }
     .admin-table button.danger:hover { border-color: #c0392b; color: #c0392b; }
-    .admin-form { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.5rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); position: sticky; top: 1rem; }
+    .admin-form { grid-column: 2; grid-row: 3 / span 5; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.35rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow: auto; }
     .admin-form h2 { font-size: 1.3rem; margin: 0 0 1rem; }
     .admin-form .field { margin-bottom: 0.9rem; }
     .admin-form label { display: block; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.3rem; opacity: 0.7; }
@@ -38,7 +39,7 @@
     .pill { display: inline-block; font-size: 0.68rem; padding: 0.15rem 0.5rem; border-radius: 99px; background: rgba(198,163,92,0.18); color: #8a6c33; }
     .admin-table .thumb-cell { width: 46px; }
     .admin-table .thumb { width: 42px; height: 42px; border-radius: 7px; object-fit: cover; background: #f4f1ea; display: block; }
-    .rates-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.1rem 1.3rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); margin-bottom: 1.75rem; }
+    .rates-card { grid-column: 1; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.1rem 1.3rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); }
     .rates-card h2 { font-size: 1.05rem; margin: 0 0 0.2rem; }
     .rates-card p.hint { font-size: 0.8rem; opacity: 0.7; margin: 0 0 0.9rem; line-height: 1.5; }
     .rates-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.9rem; }
@@ -75,18 +76,19 @@
     .admin-form.is-editing { border-color: #c6a35c; box-shadow: 0 0 0 2px rgba(198,163,92,0.35), 0 8px 28px rgba(0,0,0,0.08); }
     .admin-table tr.is-editing-row { background: rgba(198,163,92,0.1); }
     .admin-table tr.is-editing-row td { border-bottom-color: rgba(198,163,92,0.35); }
-    .bulk-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.25rem 1.4rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); margin-bottom: 1.75rem; }
+    .bulk-card { grid-column: 1; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.25rem 1.4rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); }
     .bulk-card h2 { font-size: 1.2rem; margin: 0 0 0.35rem; }
     .bulk-card .hint { font-size: 0.82rem; opacity: 0.72; line-height: 1.5; margin: 0 0 1rem; }
     .bulk-defaults { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; padding: 0.85rem; background: #faf8f4; border-radius: 10px; border: 1px solid rgba(0,0,0,0.06); }
     .bulk-defaults label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.65; margin-bottom: 0.25rem; }
     .bulk-defaults select, .bulk-defaults input { width: 100%; font: inherit; font-size: 0.85rem; padding: 0.45rem 0.55rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 6px; box-sizing: border-box; }
     .bulk-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
+    .bulk-actions .bulk-primary { margin-left: auto; }
     .bulk-actions input[type=file] { display: none; }
     .bulk-actions label.file-btn { font-size: 0.78rem; padding: 0.45rem 0.85rem; border-radius: 6px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }
     .bulk-actions label.file-btn:hover { border-color: #c6a35c; color: #8a6c33; }
     .bulk-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; }
-    .bulk-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 1100px; }
+    .bulk-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 940px; }
     .bulk-table th, .bulk-table td { padding: 0.45rem 0.4rem; border-bottom: 1px solid rgba(0,0,0,0.07); vertical-align: top; }
     .bulk-table th { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.6; position: sticky; top: 0; background: #fff; z-index: 1; }
     .bulk-table input, .bulk-table select, .bulk-table textarea { width: 100%; font: inherit; font-size: 0.8rem; padding: 0.35rem 0.45rem; border: 1px solid rgba(0,0,0,0.18); border-radius: 5px; box-sizing: border-box; }
@@ -111,6 +113,13 @@
     .bulk-thumb-wrap button { font: inherit; font-size: 0.65rem; padding: 0.2rem 0.45rem; border-radius: 5px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; white-space: nowrap; }
     .bulk-thumb-wrap button:hover { border-color: #c6a35c; color: #8a6c33; }
     .bulk-thumb-wrap button:disabled { opacity: 0.4; cursor: not-allowed; }
+    @media (max-width: 1020px) {
+      .admin-wrap { display: block; max-width: 1100px; padding-top: 1.5rem; }
+      .admin-note, .rates-card, .bulk-card { margin-bottom: 1.25rem; }
+      .admin-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+      .admin-form { position: static; max-height: none; overflow: visible; }
+      .bulk-actions .bulk-primary { margin-left: 0; }
+    }
   </style>
 </head>
 <body data-page="admin">
@@ -221,6 +230,7 @@
         <button type="button" class="btn-sm outline" id="btn-bulk-template">Download CSV template</button>
         <button type="button" class="btn-sm outline" id="btn-bulk-add-row">Add empty row</button>
         <button type="button" class="btn-sm outline" id="btn-bulk-clear">Clear all rows</button>
+        <button type="button" class="btn-sm gold bulk-primary" id="btn-bulk-import">Add all to catalogue</button>
       </div>
       <div class="bulk-wrap">
         <table class="bulk-table" id="bulk-table">
@@ -247,7 +257,6 @@
       </div>
       <div class="bulk-foot">
         <span class="bulk-count" id="bulk-count">0 pieces ready</span>
-        <button type="button" class="btn-sm gold" id="btn-bulk-import">Add all to catalogue</button>
       </div>
     </div>
 
