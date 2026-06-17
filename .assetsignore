@@ -1,0 +1,11 @@
+# Repository metadata should never be uploaded as static assets.
+.git/
+.cursor/
+.github/
+
+# Local/deploy tooling and documentation are not website assets.
+scripts/
+*.bat
+*.md
+.gitignore
+.assetsignore
