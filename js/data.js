@@ -125,6 +125,59 @@ const MAHSERI_PRODUCTS = [
   }
 ];
 
+/* Image folders available to admin.html → Bulk import → Import products from folder.
+   Keep this manifest in sync when adding image files to assets/Products. */
+const MAHSERI_PRODUCT_IMAGE_FOLDERS = [
+  {
+    collection: "gold",
+    category: "Bracelets",
+    folder: "assets/Products/gold/bracelets/",
+    files: [
+      "Flower Oval Rolo Bracelet.jpeg",
+      "Gold Half Lira Bracelet Paper Clip.jpeg",
+      "Gold Quarter Lira Bracelet Paper Clip.jpeg",
+      "Oval Rolo Bracelet.jpeg",
+      "Stacked Gold Half Liras Bracelet.jpeg",
+      "Stacked Gold Liras Bracelet.jpeg",
+      "Stacked Gold Quarter Liras Bracelet.jpeg"
+    ]
+  },
+  {
+    collection: "silver",
+    category: "Bracelets",
+    folder: "assets/Products/silver/bracelets/",
+    files: [
+      "1.jpg",
+      "2.jpg",
+      "3.jpg",
+      "4.jpg",
+      "5.jpg",
+      "6.jpg",
+      "7.jpg",
+      "8.jpg",
+      "9.jpg",
+      "10.jpg",
+      "11.jpg",
+      "12.jpg",
+      "13.jpg",
+      "14.jpg",
+      "15.jpg",
+      "16.jpg",
+      "17.jpg",
+      "18.jpg",
+      "19.jpg",
+      "20.jpg",
+      "21.jpg",
+      "22.jpg",
+      "23.jpg",
+      "24.jpg",
+      "25.jpg",
+      "26.jpg",
+      "27.jpg"
+    ]
+  }
+];
+
 const MAHSERI_CATEGORIES = [
   "Necklaces",
   "Rings",

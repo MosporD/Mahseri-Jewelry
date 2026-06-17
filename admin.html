@@ -79,6 +79,10 @@
     .bulk-card { grid-column: 1; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.25rem 1.4rem; box-shadow: 0 8px 28px rgba(0,0,0,0.05); }
     .bulk-card h2 { font-size: 1.2rem; margin: 0 0 0.35rem; }
     .bulk-card .hint { font-size: 0.82rem; opacity: 0.72; line-height: 1.5; margin: 0 0 1rem; }
+    .folder-import { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 0.65rem; align-items: end; margin-bottom: 1rem; padding: 0.85rem; background: rgba(198,163,92,0.1); border: 1px solid rgba(198,163,92,0.28); border-radius: 10px; }
+    .folder-import label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.65; margin-bottom: 0.25rem; }
+    .folder-import select { width: 100%; font: inherit; font-size: 0.85rem; padding: 0.45rem 0.55rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 6px; box-sizing: border-box; background: #fff; }
+    .folder-import__status { grid-column: 1 / -1; font-size: 0.78rem; opacity: 0.72; min-height: 1em; }
     .bulk-defaults { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; padding: 0.85rem; background: #faf8f4; border-radius: 10px; border: 1px solid rgba(0,0,0,0.06); }
     .bulk-defaults label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.65; margin-bottom: 0.25rem; }
     .bulk-defaults select, .bulk-defaults input { width: 100%; font: inherit; font-size: 0.85rem; padding: 0.45rem 0.55rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 6px; box-sizing: border-box; }
@@ -118,6 +122,7 @@
       .admin-note, .rates-card, .bulk-card { margin-bottom: 1.25rem; }
       .admin-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
       .admin-form { position: static; max-height: none; overflow: visible; }
+      .folder-import { grid-template-columns: 1fr; }
       .bulk-actions .bulk-primary { margin-left: 0; }
     }
   </style>
@@ -188,6 +193,14 @@
         photo file like the product in <code>assets/Products/&lt;gold|silver&gt;/&lt;category&gt;/</code>.
         See <code>assets/Products/README.txt</code>.
       </p>
+      <div class="folder-import">
+        <div>
+          <label for="folder-import-select">Import products from folder</label>
+          <select id="folder-import-select"></select>
+        </div>
+        <button type="button" class="btn-sm gold" id="btn-import-folder-products">Add unused products</button>
+        <div class="folder-import__status" id="folder-import-status"></div>
+      </div>
       <div class="bulk-defaults">
         <div>
           <label for="bulk-def-collection">Default collection</label>
@@ -434,6 +447,6 @@
   <script src="js/pricing.js?v=7"></script>
   <script src="js/telegram-catalog.js?v=1"></script>
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
-  <script src="js/admin.js?v=14"></script>
+  <script src="js/admin.js?v=15"></script>
 </body>
 </html>

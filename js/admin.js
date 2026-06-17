@@ -331,6 +331,164 @@
     return "assets/Products/" + type + "/" + categoryFolderSlug(category) + "/";
   }
 
+  function normalizeImagePath(path) {
+    return String(path || "").replace(/\\/g, "/").trim().toLowerCase();
+  }
+
+  function productImagePathsInUse() {
+    var used = {};
+    products.forEach(function (p) {
+      if (p && p.image) used[normalizeImagePath(p.image)] = true;
+    });
+    return used;
+  }
+
+  function folderImagePaths(folder) {
+    if (!folder || !Array.isArray(folder.files)) return [];
+    return folder.files.map(function (file) {
+      return String(folder.folder || "") + String(file || "");
+    }).filter(Boolean);
+  }
+
+  function folderLabel(folder) {
+    var count = folderImagePaths(folder).length;
+    var prefix = folder.collection ? folder.collection.charAt(0).toUpperCase() + folder.collection.slice(1) : "Products";
+    return prefix + " / " + (folder.category || "Folder") + " (" + count + " image" + (count === 1 ? "" : "s") + ")";
+  }
+
+  function unusedFolderImagePaths(folder) {
+    var used = productImagePathsInUse();
+    return folderImagePaths(folder).filter(function (path) {
+      return !used[normalizeImagePath(path)];
+    });
+  }
+
+  function populateFolderImportSelect() {
+    var sel = $("#folder-import-select");
+    var status = $("#folder-import-status");
+    if (!sel) return;
+    var folders = typeof MAHSERI_PRODUCT_IMAGE_FOLDERS !== "undefined" ? MAHSERI_PRODUCT_IMAGE_FOLDERS : [];
+    if (!folders.length) {
+      sel.innerHTML = '<option value="">No product folders found</option>';
+      if (status) status.textContent = "Add folders to MAHSERI_PRODUCT_IMAGE_FOLDERS in js/data.js.";
+      return;
+    }
+    sel.innerHTML = folders.map(function (folder, idx) {
+      var unused = unusedFolderImagePaths(folder).length;
+      return '<option value="' + idx + '">' + esc(folderLabel(folder)) + " — " + unused + " unused</option>";
+    }).join("");
+    updateFolderImportStatus();
+  }
+
+  function selectedImportFolder() {
+    var sel = $("#folder-import-select");
+    var folders = typeof MAHSERI_PRODUCT_IMAGE_FOLDERS !== "undefined" ? MAHSERI_PRODUCT_IMAGE_FOLDERS : [];
+    if (!sel || !folders.length) return null;
+    return folders[Number(sel.value)] || null;
+  }
+
+  function updateFolderImportStatus() {
+    var status = $("#folder-import-status");
+    var btn = $("#btn-import-folder-products");
+    var folder = selectedImportFolder();
+    if (!status || !btn) return;
+    if (!folder) {
+      status.textContent = "Choose a folder to import.";
+      btn.disabled = true;
+      return;
+    }
+    var unused = unusedFolderImagePaths(folder).length;
+    status.textContent = unused
+      ? unused + " unused image(s) will be added. Existing product images are skipped."
+      : "No unused images in this folder. Existing product images will not be duplicated.";
+    btn.disabled = unused === 0;
+  }
+
+  function titleFromFileName(file) {
+    return String(file || "")
+      .replace(/\.[^.]+$/, "")
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/\b\w/g, function (ch) { return ch.toUpperCase(); });
+  }
+
+  function singularCategory(category) {
+    var map = {
+      Bracelets: "Bracelet",
+      Necklaces: "Necklace",
+      Rings: "Ring",
+      Earrings: "Earring",
+      Brooches: "Brooch",
+      Anklets: "Anklet"
+    };
+    return map[category] || String(category || "Product").replace(/s$/, "");
+  }
+
+  function productNameFromImagePath(path, folder) {
+    var file = String(path || "").split("/").pop();
+    var title = titleFromFileName(file);
+    if (/^\d+$/.test(title)) {
+      var coll = folder.collection ? folder.collection.charAt(0).toUpperCase() + folder.collection.slice(1) : "";
+      return (coll + " " + singularCategory(folder.category) + " " + title).trim() + " — edit name";
+    }
+    return title + " — edit name";
+  }
+
+  function materialForFolder(folder) {
+    if (folder.collection === "silver") return "925 Silver";
+    if (folder.collection === "gold") return "21K Gold";
+    return getBulkDefaults().material || "925 Silver";
+  }
+
+  function weightForFolder(folder) {
+    if (folder.collection === "gold") return 40;
+    if (folder.collection === "silver") return 10;
+    return 1;
+  }
+
+  function addProductsFromSelectedFolder() {
+    var folder = selectedImportFolder();
+    if (!folder) return;
+    var paths = unusedFolderImagePaths(folder);
+    if (!paths.length) {
+      updateFolderImportStatus();
+      return;
+    }
+    if (!confirm("Add " + paths.length + " unused product(s) from " + folderLabel(folder) + "?")) return;
+    paths.forEach(function (path) {
+      var name = productNameFromImagePath(path, folder);
+      var grams = weightForFolder(folder);
+      var material = materialForFolder(folder);
+      products.push({
+        id: uniqueProductId(name),
+        sku: nextSku(),
+        name: name,
+        name_ar: "",
+        collection: folder.collection || "gold",
+        category: folder.category || "Bracelets",
+        material: material,
+        gender: getBulkDefaults().gender || "Her",
+        price: computePrice(grams, material, 0),
+        weight: grams + " g",
+        makingFee: 0,
+        badge: null,
+        art: inferArt(folder.category),
+        image: path,
+        description: "Edit description in admin.",
+        description_ar: "",
+        inStock: true,
+        telegramHeadline: "",
+        telegramBlurb: "",
+        telegramSchedule: false
+      });
+    });
+    persist();
+    render();
+    populateFolderImportSelect();
+    alert("Added " + paths.length + " product(s). Edit details, then Download data.js when ready to publish.");
+  }
+
   var PRODUCT_IMAGE_EXTS = [".jpg", ".jpeg", ".png", ".webp"];
 
   function productImageSlug(name) {
@@ -948,6 +1106,7 @@
     }).join("");
     $("#product-rows").innerHTML =
       rows || '<tr><td colspan="8" style="opacity:0.6">No matching pieces.</td></tr>';
+    updateFolderImportStatus();
   }
 
   function highlightEditingRow(id) {
@@ -1174,6 +1333,7 @@
     initGate();
     populateCategories();
     populateBulkDefaultCategories();
+    populateFolderImportSelect();
     renderRates();
     setAutoPrice(true);
     showImage("");
@@ -1187,6 +1347,8 @@
     });
 
     on("#bulk-def-collection", "change", populateBulkDefaultCategories);
+    on("#folder-import-select", "change", updateFolderImportStatus);
+    on("#btn-import-folder-products", "click", addProductsFromSelectedFolder);
 
     on("#bulk-rows", "input", function (e) {
       var row = e.target.closest("tr[data-bulk-key]");

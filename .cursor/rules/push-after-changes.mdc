@@ -1,0 +1,14 @@
+---
+description: Push completed changes to GitHub by default
+alwaysApply: true
+---
+
+# Push After Changes
+
+After making code, data, asset, or configuration changes, commit and push the completed work to GitHub unless the user explicitly says not to push.
+
+- Include all files required for the change to work, including new product images or other assets referenced by edited code/data.
+- Do not include unrelated local files unless they are needed for the requested change.
+- Before committing, review `git status` and the diff so the commit only contains relevant work.
+- Use a concise commit message that describes the user-facing outcome.
+- If pushing requires approval, request approval and continue the push once approved.
