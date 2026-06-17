@@ -1,7 +1,11 @@
 {
   "scripts": {
     "build": "node scripts/build-dist.js",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "upload:supabase-products": "node scripts/upload-supabase-products.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.87.1"
   },
   "devDependencies": {
     "wrangler": "^4.101.0"
