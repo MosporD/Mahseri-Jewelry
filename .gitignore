@@ -1,3 +1,10 @@
 scripts/telegram-scheduled-products.json
 .tmp-main-dart.js
 *.lnk
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
