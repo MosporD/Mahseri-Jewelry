@@ -84,6 +84,26 @@ var MAHSERI_PRICING = {
     return this.round(formula(spot.gold24, spot.silver, 1));
   },
 
+  applyStorefrontPrices: function (spot) {
+    if (typeof MAHSERI_PRODUCTS === "undefined" || !spot) return false;
+    var changed = false;
+    MAHSERI_PRODUCTS.forEach(function (p) {
+      var weight = parseFloat(p.weight);
+      var makingFee = p.makingFee != null ? p.makingFee : p.making_fee;
+      var price = MAHSERI_PRICING.computePrice(
+        p.material, weight, makingFee || 0, spot
+      );
+      if (price > 0 && price !== p.price) {
+        p.price = price;
+        changed = true;
+      }
+    });
+    if (changed) {
+      document.dispatchEvent(new CustomEvent("mahseri:prices-updated"));
+    }
+    return changed;
+  },
+
   validUsdOz: function (metal, value) {
     var n = Number(value);
     if (!(n > 0)) return 0;
@@ -288,25 +308,7 @@ var MAHSERI_PRICING = {
 
   if (!MAHSERI_PRICING.enabled) return;
 
-  function applyPrices(spot) {
-    var changed = false;
-    MAHSERI_PRODUCTS.forEach(function (p) {
-      var weight = parseFloat(p.weight);
-      var makingFee = p.makingFee != null ? p.makingFee : p.making_fee;
-      var price = MAHSERI_PRICING.computePrice(
-        p.material, weight, makingFee || 0, spot
-      );
-      if (price > 0 && price !== p.price) {
-        p.price = price;
-        changed = true;
-      }
-    });
-    if (changed) {
-      document.dispatchEvent(new CustomEvent("mahseri:prices-updated"));
-    }
-  }
-
   MAHSERI_PRICING.fetchSpotPrices(false)
-    .then(applyPrices)
+    .then(function (spot) { MAHSERI_PRICING.applyStorefrontPrices(spot); })
     .catch(function () { /* offline — keep static prices */ });
 })();

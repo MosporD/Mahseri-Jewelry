@@ -577,6 +577,9 @@ html[dir="rtl"] .pd-copy h1 { font-family: "Cormorant Garamond", "Segoe UI", ser
 .shop-metal-switch-section .container {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 .shop-metal-switch {
   display: inline-flex;
@@ -604,6 +607,42 @@ html[dir="rtl"] .pd-copy h1 { font-family: "Cormorant Garamond", "Segoe UI", ser
 .shop-metal-pill.active {
   background: var(--charcoal);
   color: var(--gold-pale);
+}
+.metal-spot-tile {
+  width: 7.6rem;
+  min-height: 7.6rem;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(198, 163, 92, 0.35);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+.spot-tile-label,
+.spot-tile-meta {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.spot-tile-meta {
+  line-height: 1.35;
+  letter-spacing: 0.08em;
+}
+.metal-spot-tile strong {
+  font-family: var(--serif);
+  font-size: 1.08rem;
+  font-weight: 400;
+  color: var(--charcoal);
+}
+.metal-spot-tile.is-loading strong {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* ---------- Product cards ---------- */

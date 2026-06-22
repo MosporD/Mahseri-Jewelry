@@ -1093,6 +1093,74 @@
     return base + "?category=" + encodeURIComponent(p.category);
   }
 
+  function formatUsdOunce(value) {
+    var n = Number(value);
+    if (!(n > 0)) return "Unavailable";
+    return "$" + n.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) + "/oz";
+  }
+
+  function formatSpotTime(ts) {
+    if (!ts) return "";
+    return new Date(ts).toLocaleTimeString("en-JO", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  function renderSpotTileState(tile, metal, spot, loading) {
+    var isGold = metal === "gold";
+    var label = isGold ? "Gold now" : "Silver now";
+    var symbol = isGold ? "XAU" : "XAG";
+    var value = spot ? (isGold ? (spot.xauUsdRaw || spot.xauUsd) : spot.xagUsd) : 0;
+    var source = spot ? (isGold ? spot.xauSource : spot.xagSource) : "";
+    var time = spot ? formatSpotTime(spot.ts) : "";
+    var meta = spot
+      ? (source || "Live spot") + (time ? " · " + time : "")
+      : "Spot unavailable";
+    tile.innerHTML =
+      '<span class="spot-tile-label">' + label + "</span>" +
+      '<strong>' + (loading ? "Loading..." : formatUsdOunce(value)) + "</strong>" +
+      '<span class="spot-tile-meta">' +
+        (loading ? "Fetching live " + symbol + " quote" : meta) +
+      "</span>";
+    tile.classList.toggle("is-loading", !!loading);
+  }
+
+  function initMetalSpotTile() {
+    var metal = getShopMetal();
+    if (metal !== "gold" && metal !== "silver") return;
+    var wrap = document.querySelector(".shop-metal-switch-section .container");
+    if (!wrap) return;
+    var tile = document.querySelector("#metal-spot-tile");
+    if (!tile) {
+      tile = document.createElement("aside");
+      tile.id = "metal-spot-tile";
+      tile.className = "metal-spot-tile";
+      tile.setAttribute("aria-live", "polite");
+      wrap.appendChild(tile);
+    }
+
+    if (typeof MAHSERI_PRICING === "undefined") {
+      renderSpotTileState(tile, metal, null, false);
+      return;
+    }
+
+    renderSpotTileState(tile, metal, null, true);
+    MAHSERI_PRICING.fetchSpotPrices(true)
+      .then(function (spot) {
+        if (typeof MAHSERI_PRICING.applyStorefrontPrices === "function") {
+          MAHSERI_PRICING.applyStorefrontPrices(spot);
+        }
+        renderSpotTileState(tile, metal, spot, false);
+      })
+      .catch(function () {
+        renderSpotTileState(tile, metal, null, false);
+      });
+  }
+
   function applyShopHubI18n() {
     setText("#shop-hub-title", t("shopHubTitle"));
     setText("#shop-hub-desc", t("shopHubDesc"));
@@ -1184,6 +1252,7 @@
 
   function initShop() {
     applyShopCatalogI18n();
+    initMetalSpotTile();
     var params = new URLSearchParams(location.search);
     if (params.get("category")) shopState.category = params.get("category");
     if (params.get("material")) shopState.material = params.get("material");
