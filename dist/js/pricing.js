@@ -7,7 +7,7 @@
 
 var MAHSERI_PRICING = {
   /* Set to true to auto-update storefront prices from live metal. */
-  enabled: false,
+  enabled: true,
 
   usdToJod: 0.71,               // JOD is pegged to the USD
   gramsPerTroyOunce: 31.1034768,
@@ -292,8 +292,9 @@ var MAHSERI_PRICING = {
     var changed = false;
     MAHSERI_PRODUCTS.forEach(function (p) {
       var weight = parseFloat(p.weight);
+      var makingFee = p.makingFee != null ? p.makingFee : p.making_fee;
       var price = MAHSERI_PRICING.computePrice(
-        p.material, weight, p.makingFee || 0, spot
+        p.material, weight, makingFee || 0, spot
       );
       if (price > 0 && price !== p.price) {
         p.price = price;
