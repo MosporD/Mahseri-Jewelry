@@ -16,11 +16,11 @@ var MAHSERI_PRICING = {
   fetchTimeoutMs: 10000,
 
   /* Mahseri markup on raw metal value (gold) or per-gram add-on (silver). */
-  premiumGold: 1.2,
+  premiumGold: 1.085,
   premiumSilver: 7,
 
   /* USD added per troy oz to international gold spot before pricing (atelier rule). */
-  goldSpotAddUsd: 50,
+  goldSpotAddUsd: 30,
 
   /* Sanity bounds for USD/troy oz (reject bad API payloads). */
   bounds: {
@@ -30,10 +30,10 @@ var MAHSERI_PRICING = {
 
   formulas: {
     "21K Gold": function (gold24, silver, weight) {
-      return (gold24 * 21 / 24) * MAHSERI_PRICING.premiumGold * weight;
+      return (gold24 * 0.885) * MAHSERI_PRICING.premiumGold * weight;
     },
     "18K Gold": function (gold24, silver, weight) {
-      return (gold24 * 18 / 24) * MAHSERI_PRICING.premiumGold * weight;
+      return (gold24 * 0.760) * MAHSERI_PRICING.premiumGold * weight;
     },
     "925 Silver": function (gold24, silver, weight) {
       return ((silver * 0.925) + MAHSERI_PRICING.premiumSilver) * weight;
