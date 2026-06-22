@@ -30,6 +30,7 @@
   var bulkKeySeq = 0;
   var cropper = null;      // Cropper.js instance while modal is open
   var cropOnDone = null;   // optional callback(dataUrl) after Apply crop
+  var cropAspectRatio = 1;
   var skuSeq = 0;
   var productFilter = "";
 
@@ -961,6 +962,18 @@
     }
   }
 
+  function selectedCropAspectRatio() {
+    var select = $("#crop-aspect");
+    if (!select || select.value === "free") return NaN;
+    var ratio = Number(select.value);
+    return ratio > 0 ? ratio : 1;
+  }
+
+  function updateCropAspectRatio() {
+    cropAspectRatio = selectedCropAspectRatio();
+    if (cropper) cropper.setAspectRatio(cropAspectRatio);
+  }
+
   function startCropperOnImage(img) {
     destroyCropper();
     if (typeof Cropper === "undefined") {
@@ -968,8 +981,9 @@
       closeCropModal();
       return;
     }
+    updateCropAspectRatio();
     cropper = new Cropper(img, {
-      aspectRatio: 1,
+      aspectRatio: cropAspectRatio,
       viewMode: 1,
       autoCropArea: 0.92,
       responsive: true,
@@ -980,7 +994,7 @@
     });
   }
 
-  /* Open the square crop editor. onDone receives a JPEG data URL when applied. */
+  /* Open the crop editor. onDone receives a JPEG data URL when applied. */
   function openCropModal(src, onDone) {
     if (!src) return;
     cropOnDone = onDone || null;
@@ -1002,13 +1016,25 @@
     if (img.complete && img.naturalWidth) img.onload();
   }
 
+  function cropOutputSize() {
+    var data = cropper && cropper.getData(true);
+    var ratio = data && data.width > 0 && data.height > 0 ? data.width / data.height : 1;
+    var maxSide = 900;
+    if (!(ratio > 0)) return { width: maxSide, height: maxSide };
+    if (ratio >= 1) {
+      return { width: maxSide, height: Math.max(1, Math.round(maxSide / ratio)) };
+    }
+    return { width: Math.max(1, Math.round(maxSide * ratio)), height: maxSide };
+  }
+
   function applyCrop() {
     if (!cropper) return;
     var canvas;
     try {
+      var size = cropOutputSize();
       canvas = cropper.getCroppedCanvas({
-        width: 900,
-        height: 900,
+        width: size.width,
+        height: size.height,
         imageSmoothingEnabled: true,
         imageSmoothingQuality: "high"
       });
@@ -1550,6 +1576,7 @@
     });
     on("#crop-cancel", "click", closeCropModal);
     on("#crop-apply", "click", applyCrop);
+    on("#crop-aspect", "change", updateCropAspectRatio);
     on("#crop-modal", "click", function (e) {
       if (e.target.id === "crop-modal") closeCropModal();
     });
