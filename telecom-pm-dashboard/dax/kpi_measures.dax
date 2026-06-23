@@ -1,0 +1,287 @@
+// ============================================================
+// Nokia / Huawei PM Cross-Reference Dashboard – DAX Measures
+// Table: Unified_KPI   (columns as produced by 02_normalize_pm_data.py)
+// ============================================================
+
+// -----------------------------------------------------------
+// 1. Core KPI aggregations
+// -----------------------------------------------------------
+
+[RRC Setup SR (%)] =
+DIVIDE(
+    SUM(Unified_KPI[rrc_succ]),
+    SUM(Unified_KPI[rrc_att]),
+    BLANK()
+) * 100
+
+[ERAB Setup SR (%)] =
+DIVIDE(
+    SUM(Unified_KPI[erab_succ]),
+    SUM(Unified_KPI[erab_att]),
+    BLANK()
+) * 100
+
+[Handover SR (%)] =
+DIVIDE(
+    SUM(Unified_KPI[ho_succ]),
+    SUM(Unified_KPI[ho_att]),
+    BLANK()
+) * 100
+
+[Avg DL Throughput (Mbps)] =
+AVERAGEX(
+    SUMMARIZE(
+        Unified_KPI,
+        Unified_KPI[site_id],
+        Unified_KPI[cell_id],
+        Unified_KPI[date],
+        Unified_KPI[hour],
+        "val", AVERAGE(Unified_KPI[dl_throughput_mbps])
+    ),
+    [val]
+)
+
+[Avg UL Throughput (Mbps)] =
+AVERAGEX(
+    SUMMARIZE(
+        Unified_KPI,
+        Unified_KPI[site_id],
+        Unified_KPI[cell_id],
+        Unified_KPI[date],
+        Unified_KPI[hour],
+        "val", AVERAGE(Unified_KPI[ul_throughput_mbps])
+    ),
+    [val]
+)
+
+[Avg Cell Availability (%)] =
+AVERAGEX(
+    SUMMARIZE(
+        Unified_KPI,
+        Unified_KPI[site_id],
+        Unified_KPI[cell_id],
+        Unified_KPI[date],
+        Unified_KPI[hour],
+        "val", AVERAGE(Unified_KPI[cell_availability_pct])
+    ),
+    [val]
+)
+
+[Avg DL PRB Utilisation (%)] =
+AVERAGEX(
+    SUMMARIZE(
+        Unified_KPI,
+        Unified_KPI[site_id],
+        Unified_KPI[cell_id],
+        Unified_KPI[date],
+        Unified_KPI[hour],
+        "val", AVERAGE(Unified_KPI[dl_prb_util_pct])
+    ),
+    [val]
+)
+
+[Avg UL PRB Utilisation (%)] =
+AVERAGEX(
+    SUMMARIZE(
+        Unified_KPI,
+        Unified_KPI[site_id],
+        Unified_KPI[cell_id],
+        Unified_KPI[date],
+        Unified_KPI[hour],
+        "val", AVERAGE(Unified_KPI[ul_prb_util_pct])
+    ),
+    [val]
+)
+
+[Total DL Volume (GB)] =
+SUM(Unified_KPI[dl_vol_gb])
+
+[Total UL Volume (GB)] =
+SUM(Unified_KPI[ul_vol_gb])
+
+[Peak Active Users] =
+MAX(Unified_KPI[active_users_max])
+
+[Total RRC Attempts] =
+SUM(Unified_KPI[rrc_att])
+
+// -----------------------------------------------------------
+// 2. Vendor-split measures (for side-by-side comparison)
+// -----------------------------------------------------------
+
+[Nokia – RRC SR (%)] =
+CALCULATE([RRC Setup SR (%)], Unified_KPI[vendor] = "Nokia")
+
+[Huawei – RRC SR (%)] =
+CALCULATE([RRC Setup SR (%)], Unified_KPI[vendor] = "Huawei")
+
+[Nokia – ERAB SR (%)] =
+CALCULATE([ERAB Setup SR (%)], Unified_KPI[vendor] = "Nokia")
+
+[Huawei – ERAB SR (%)] =
+CALCULATE([ERAB Setup SR (%)], Unified_KPI[vendor] = "Huawei")
+
+[Nokia – HO SR (%)] =
+CALCULATE([Handover SR (%)], Unified_KPI[vendor] = "Nokia")
+
+[Huawei – HO SR (%)] =
+CALCULATE([Handover SR (%)], Unified_KPI[vendor] = "Huawei")
+
+[Nokia – DL Throughput (Mbps)] =
+CALCULATE([Avg DL Throughput (Mbps)], Unified_KPI[vendor] = "Nokia")
+
+[Huawei – DL Throughput (Mbps)] =
+CALCULATE([Avg DL Throughput (Mbps)], Unified_KPI[vendor] = "Huawei")
+
+[Nokia – Cell Availability (%)] =
+CALCULATE([Avg Cell Availability (%)], Unified_KPI[vendor] = "Nokia")
+
+[Huawei – Cell Availability (%)] =
+CALCULATE([Avg Cell Availability (%)], Unified_KPI[vendor] = "Huawei")
+
+// -----------------------------------------------------------
+// 3. Delta (Nokia minus Huawei) for difference charts
+// -----------------------------------------------------------
+
+[Delta – RRC SR (pp)] =
+[Nokia – RRC SR (%)] - [Huawei – RRC SR (%)]
+
+[Delta – ERAB SR (pp)] =
+[Nokia – ERAB SR (%)] - [Huawei – ERAB SR (%)]
+
+[Delta – HO SR (pp)] =
+[Nokia – HO SR (%)] - [Huawei – HO SR (%)]
+
+[Delta – DL Throughput (Mbps)] =
+[Nokia – DL Throughput (Mbps)] - [Huawei – DL Throughput (Mbps)]
+
+[Delta – Cell Availability (pp)] =
+[Nokia – Cell Availability (%)] - [Huawei – Cell Availability (%)]
+
+// -----------------------------------------------------------
+// 4. Swap-impact measures
+//    Requires Vendor_Swap table joined to Unified_KPI on site_id.
+//    swap_date column type: date (text "YYYY-MM-DD" parsed in Power Query).
+// -----------------------------------------------------------
+
+[Pre-Swap RRC SR (%)] =
+CALCULATE(
+    [RRC Setup SR (%)],
+    FILTER(
+        Unified_KPI,
+        RELATED(Vendor_Swap[swap_date]) <> BLANK() &&
+        Unified_KPI[date] < RELATED(Vendor_Swap[swap_date])
+    )
+)
+
+[Post-Swap RRC SR (%)] =
+CALCULATE(
+    [RRC Setup SR (%)],
+    FILTER(
+        Unified_KPI,
+        RELATED(Vendor_Swap[swap_date]) <> BLANK() &&
+        Unified_KPI[date] >= RELATED(Vendor_Swap[swap_date])
+    )
+)
+
+[Pre-Swap ERAB SR (%)] =
+CALCULATE(
+    [ERAB Setup SR (%)],
+    FILTER(
+        Unified_KPI,
+        RELATED(Vendor_Swap[swap_date]) <> BLANK() &&
+        Unified_KPI[date] < RELATED(Vendor_Swap[swap_date])
+    )
+)
+
+[Post-Swap ERAB SR (%)] =
+CALCULATE(
+    [ERAB Setup SR (%)],
+    FILTER(
+        Unified_KPI,
+        RELATED(Vendor_Swap[swap_date]) <> BLANK() &&
+        Unified_KPI[date] >= RELATED(Vendor_Swap[swap_date])
+    )
+)
+
+[Pre-Swap DL Throughput (Mbps)] =
+CALCULATE(
+    [Avg DL Throughput (Mbps)],
+    FILTER(
+        Unified_KPI,
+        RELATED(Vendor_Swap[swap_date]) <> BLANK() &&
+        Unified_KPI[date] < RELATED(Vendor_Swap[swap_date])
+    )
+)
+
+[Post-Swap DL Throughput (Mbps)] =
+CALCULATE(
+    [Avg DL Throughput (Mbps)],
+    FILTER(
+        Unified_KPI,
+        RELATED(Vendor_Swap[swap_date]) <> BLANK() &&
+        Unified_KPI[date] >= RELATED(Vendor_Swap[swap_date])
+    )
+)
+
+[Swap Impact – RRC SR (pp)] =
+[Post-Swap RRC SR (%)] - [Pre-Swap RRC SR (%)]
+
+[Swap Impact – ERAB SR (pp)] =
+[Post-Swap ERAB SR (%)] - [Pre-Swap ERAB SR (%)]
+
+[Swap Impact – DL Throughput (Mbps)] =
+[Post-Swap DL Throughput (Mbps)] - [Pre-Swap DL Throughput (Mbps)]
+
+// -----------------------------------------------------------
+// 5. Period-over-period (last 7 days vs prior 7 days)
+//    Expects a Date table with [date] column of type Date.
+// -----------------------------------------------------------
+
+[Last 7d RRC SR (%)] =
+CALCULATE(
+    [RRC Setup SR (%)],
+    DATESINPERIOD(DateDim[date], MAX(DateDim[date]), -7, DAY)
+)
+
+[Prior 7d RRC SR (%)] =
+CALCULATE(
+    [RRC Setup SR (%)],
+    DATESINPERIOD(DateDim[date], MAX(DateDim[date]) - 7, -7, DAY)
+)
+
+[WoW RRC SR Change (pp)] =
+[Last 7d RRC SR (%)] - [Prior 7d RRC SR (%)]
+
+// -----------------------------------------------------------
+// 6. Cell count helpers (for scorecards)
+// -----------------------------------------------------------
+
+[# Sites] =
+DISTINCTCOUNT(Unified_KPI[site_id])
+
+[# Cells] =
+DISTINCTCOUNT(Unified_KPI[cell_id])
+
+[# Nokia Sites] =
+CALCULATE(DISTINCTCOUNT(Unified_KPI[site_id]), Unified_KPI[vendor] = "Nokia")
+
+[# Huawei Sites] =
+CALCULATE(DISTINCTCOUNT(Unified_KPI[site_id]), Unified_KPI[vendor] = "Huawei")
+
+// -----------------------------------------------------------
+// 7. KPI colour thresholds (return 1/0 for conditional formatting)
+// -----------------------------------------------------------
+
+[RRC SR OK] =
+IF([RRC Setup SR (%)] >= 99, 1, IF([RRC Setup SR (%)] >= 97, 0, -1))
+// 1 = green (≥99%), 0 = amber (97–99%), -1 = red (<97%)
+
+[ERAB SR OK] =
+IF([ERAB Setup SR (%)] >= 99, 1, IF([ERAB Setup SR (%)] >= 97, 0, -1))
+
+[HO SR OK] =
+IF([Handover SR (%)] >= 98, 1, IF([Handover SR (%)] >= 95, 0, -1))
+
+[Cell Avail OK] =
+IF([Avg Cell Availability (%)] >= 99.9, 1, IF([Avg Cell Availability (%)] >= 99, 0, -1))
