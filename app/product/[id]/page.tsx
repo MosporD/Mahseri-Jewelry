@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AddToCartButton } from "@/components/add-to-cart-button";
+import { ProductPurchaseControls } from "@/components/product-purchase-controls";
 import { ProductCard } from "@/components/product-card";
 import { getProduct, getProducts, productMatchesCollection } from "@/src/lib/catalog";
 import { computeProductPrice, formatPrice, getMetalSpot } from "@/src/lib/pricing";
@@ -37,10 +37,18 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <section className="product-detail section">
-        <div className="container pd-grid">
+      <section className="section">
+        <div className="container">
+          <p className="breadcrumb" style={{ color: "var(--muted)", marginBottom: "2.4rem" }}>
+            <Link href="/">Home</Link> &nbsp;/&nbsp;{" "}
+            <Link href={`/shop/${product.collection}`}>Shop</Link> &nbsp;/&nbsp; {product.name}
+          </p>
+
+          <div className="product-layout">
           <div className="pd-media">
+            <span className="pd-zoom-hint">Click to zoom</span>
             <Image
+              className="pd-img"
               src={product.image || "/assets/art/precious-stone.svg"}
               alt={product.name}
               width={900}
@@ -48,22 +56,40 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               priority
             />
           </div>
-          <div className="pd-copy">
-            <p className="breadcrumb">
-              <Link href="/">Home</Link> &nbsp;/&nbsp;{" "}
-              <Link href={`/shop/${product.collection}`}>{product.collection}</Link> &nbsp;/&nbsp;{" "}
-              {product.name}
-            </p>
-            <p className="eyebrow">{product.category}</p>
+
+          <div className="pd-info">
+            <p className="pc-cat">{product.category}</p>
             <h1>{product.name}</h1>
             <p className="pd-price">{formatPrice(price)}</p>
-            <p>{product.description || "Handcrafted in the Mahseri atelier."}</p>
+            <p className="pd-desc">{product.description || "Handcrafted in the Mahseri atelier."}</p>
             <ul className="pd-specs">
-              <li><span>Material</span><strong>{product.material}</strong></li>
-              <li><span>Weight</span><strong>{product.weight}</strong></li>
-              <li><span>Stock</span><strong>{inStock ? "In stock" : "Out of stock"}</strong></li>
+              <li><span>Metal</span><b>{product.material}</b></li>
+              <li><span>Approx. weight</span><b>{product.weight}</b></li>
+              <li><span>Hallmark</span><b>Stamped & certified</b></li>
+              <li><span>Availability</span><b>{inStock ? "In stock · ships in 1–2 days" : "Out of stock"}</b></li>
             </ul>
-            <AddToCartButton productId={product.id} disabled={!inStock} />
+            <ProductPurchaseControls productId={product.id} disabled={!inStock} />
+            <ul className="pd-trust">
+              <li>◇ Insured delivery anywhere in Jordan</li>
+              <li>◇ 14-day exchange, no questions asked</li>
+              <li>◇ 2-year craftsmanship warranty on gold</li>
+            </ul>
+            <details className="size-guide">
+              <summary>Ring & bangle size guide</summary>
+              <div className="sg-body">
+                <p>Wrap a strip of paper around your finger or wrist, mark where it meets, and measure the length in millimetres. Match it below — or visit the atelier and we will size you in person.</p>
+                <table>
+                  <tbody>
+                    <tr><th>Size</th><th>Circumference</th><th>Fits</th></tr>
+                    <tr><td>S</td><td>49–52 mm</td><td>Ring sizes 5–6</td></tr>
+                    <tr><td>M</td><td>53–57 mm</td><td>Ring sizes 6.5–8</td></tr>
+                    <tr><td>L</td><td>58–62 mm</td><td>Ring sizes 8.5–10</td></tr>
+                    <tr><td>Bangle</td><td>160–190 mm wrist</td><td>Made to your measure</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </div>
           </div>
         </div>
       </section>
@@ -71,8 +97,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       <section className="section section-tinted">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">Related</p>
-            <h2>You may also like</h2>
+            <p className="eyebrow">Complete the look</p>
+            <h2>You may also love</h2>
           </div>
           <div className="product-grid">
             {related.map((item) => (

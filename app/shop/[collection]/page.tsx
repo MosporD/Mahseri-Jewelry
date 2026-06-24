@@ -91,14 +91,19 @@ export default async function CollectionPage({
       <section className="section">
         <div className="container">
           <div className="shop-layout">
-            <aside className="shop-filters" aria-label="Product filters">
-              <FilterGroup title={collection === "gems" ? "Gem type" : "Category"} values={["All", ...categoryList]} active={category} param="category" collection={collection} />
-              <FilterGroup title="Material" values={["All", ...materialList]} active={material} param="material" collection={collection} />
-              <FilterGroup title="Shop for" values={["All", "Her", "Him", "Both"]} active={gender} param="gender" collection={collection} />
-              <FilterGroup title="Sort" values={["featured", "price-asc", "price-desc", "name"]} active={sort} param="sort" collection={collection} />
+            <aside className="shop-filters open" aria-label="Product filters">
+              <FilterGroup title={collection === "gems" ? "Gem type" : "Category"} values={["All", ...categoryList]} active={category} param="category" collection={collection} current={{ category, material, gender, sort }} />
+              <FilterGroup title="Material" values={["All", ...materialList]} active={material} param="material" collection={collection} current={{ category, material, gender, sort }} />
+              <FilterGroup title="Shop for" values={["All", "Her", "Him", "Both"]} active={gender} param="gender" collection={collection} current={{ category, material, gender, sort }} />
+              <FilterGroup title="Sort" values={["featured", "price-asc", "price-desc", "name"]} active={sort} param="sort" collection={collection} current={{ category, material, gender, sort }} />
             </aside>
-            <div>
+            <div className="shop-main">
               <div className="shop-bar-mobile">
+                <span className="shop-count">
+                  {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
+                </span>
+              </div>
+              <div className="shop-toolbar-desktop">
                 <span className="shop-count">
                   {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
                 </span>
@@ -114,6 +119,16 @@ export default async function CollectionPage({
           </div>
         </div>
       </section>
+      <section className="section cta-band">
+        <div className="container">
+          <p className="eyebrow">Explore more</p>
+          <h2>{collection === "gold" ? "Explore the silver collection" : "Explore the gold collection"}</h2>
+          <p>One atelier standard across every metal, stone, and finish.</p>
+          <Link className="btn btn-gold" href={collection === "gold" ? "/shop/silver" : "/shop/gold"}>
+            {collection === "gold" ? "Shop silver" : "Shop gold"}
+          </Link>
+        </div>
+      </section>
     </>
   );
 }
@@ -123,13 +138,15 @@ function FilterGroup({
   values,
   active,
   param,
-  collection
+  collection,
+  current
 }: {
   title: string;
   values: string[];
   active: string;
   param: string;
   collection: ProductCollection;
+  current: { category: string; material: string; gender: string; sort: string };
 }) {
   return (
     <div className="filter-section">
@@ -139,13 +156,24 @@ function FilterGroup({
           <Link
             key={value}
             className={`chip${active === value ? " active" : ""}`}
-            href={{ pathname: `/shop/${collection}`, query: value === "All" ? {} : { [param]: value } }}
+            href={{ pathname: `/shop/${collection}`, query: buildQuery(current, param, value) }}
           >
             {formatFilterLabel(value)}
           </Link>
         ))}
       </div>
     </div>
+  );
+}
+
+function buildQuery(
+  current: { category: string; material: string; gender: string; sort: string },
+  param: string,
+  value: string
+) {
+  const next = { ...current, [param]: value };
+  return Object.fromEntries(
+    Object.entries(next).filter(([, entry]) => entry !== "All" && entry !== "featured")
   );
 }
 

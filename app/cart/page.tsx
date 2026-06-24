@@ -17,7 +17,7 @@ export default async function CartPage() {
             <Link href="/">Home</Link> &nbsp;/&nbsp; Cart
           </p>
           <h1>Your Bag</h1>
-          <p>Review your selected pieces and send the order to Mahseri Jewellery for confirmation.</p>
+          <p>Review your pieces, then complete your order — pay on delivery or confirm instantly over WhatsApp.</p>
         </div>
       </section>
       <section className="section">

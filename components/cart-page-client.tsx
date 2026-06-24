@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useCart } from "./cart-provider";
 import type { Product } from "@/src/lib/types";
 import { storeSettings } from "@/src/lib/seed-data";
@@ -8,6 +10,7 @@ import { storeSettings } from "@/src/lib/seed-data";
 export function CartPageClient({ products }: { products: Product[] }) {
   const { items, updateItem, removeItem, clearCart } = useCart();
   const [status, setStatus] = useState("");
+  const [success, setSuccess] = useState("");
   const productMap = useMemo(() => new Map(products.map((product) => [product.id, product])), [products]);
   const lines = items
     .map((item) => {
@@ -62,56 +65,106 @@ export function CartPageClient({ products }: { products: Product[] }) {
       return;
     }
     clearCart();
-    setStatus(`Order ${result.orderNumber || result.id} received. We will contact you to confirm.`);
+    setSuccess(`Order ${result.orderNumber || result.id} received. We will contact you to confirm.`);
+    setStatus("");
+  }
+
+  if (success) {
+    return (
+      <div className="order-success">
+        <div className="check">✓</div>
+        <h2>Order received with thanks</h2>
+        <p className="order-no">{success.split(" received")[0]}</p>
+        <p>{success}</p>
+        <Link className="btn btn-outline" href="/shop">Continue browsing</Link>
+      </div>
+    );
   }
 
   return (
-    <div className="cart-page-grid">
-      <div>
+    <>
+      {!lines.length ? (
+        <div>
+          <p className="empty-note">Your bag is empty — the collection is waiting.</p>
+          <p style={{ textAlign: "center" }}><Link className="btn btn-solid" href="/shop">Browse the collection</Link></p>
+        </div>
+      ) : null}
+      <div className="cart-layout">
+      <div className="cart-table">
         {lines.length ? (
           lines.map((line) => (
             <article className="cart-line" key={line.product.id}>
               <div>
-                <h3>{line.product.name}</h3>
-                <p>{line.product.material} · {line.product.weight}</p>
-                <p>{line.product.price.toLocaleString("en-JO")} JOD each</p>
+                <div className="cl-thumb">
+                  <Image
+                    src={line.product.image || "/assets/art/precious-stone.svg"}
+                    alt=""
+                    width={74}
+                    height={74}
+                  />
+                </div>
               </div>
-              <div className="admin-actions">
-                <input
-                  aria-label={`Quantity for ${line.product.name}`}
-                  min={1}
-                  type="number"
-                  value={line.item.qty}
-                  onChange={(event) => updateItem(line.product.id, Number(event.target.value))}
-                />
-                <button className="btn btn-ghost" type="button" onClick={() => removeItem(line.product.id)}>
-                  Remove
-                </button>
+              <div>
+                <h4>{line.product.name}</h4>
+                <p className="cl-meta">{line.product.material} · {line.product.weight} · {line.product.price.toLocaleString("en-JO")} JOD each</p>
+                <div className="cl-qty">
+                  <button type="button" onClick={() => updateItem(line.product.id, Math.max(1, line.item.qty - 1))}>−</button>
+                  <span>{line.item.qty}</span>
+                  <button type="button" onClick={() => updateItem(line.product.id, line.item.qty + 1)}>+</button>
+                  <button type="button" onClick={() => removeItem(line.product.id)}>Remove</button>
+                </div>
+              </div>
+              <div>
+                <p className="cl-price">{line.lineTotal.toLocaleString("en-JO")} JOD</p>
               </div>
             </article>
           ))
         ) : (
-          <p className="empty-note">Your bag is empty — the collection is waiting.</p>
+          null
         )}
       </div>
-      <aside className="admin-panel">
-        <h2>Checkout</h2>
-        <p>Subtotal: {subtotal.toLocaleString("en-JO")} JOD</p>
-        <p>Delivery: {shipping ? `${shipping} JOD` : "Free"}</p>
-        <p>Total: {total.toLocaleString("en-JO")} JOD</p>
-        <p>Deposit due now: {deposit.toLocaleString("en-JO")} JOD</p>
+      <aside className="summary-card">
+        <h3>Order Summary</h3>
+        <div className="summary-row"><span>Subtotal</span><span>{subtotal.toLocaleString("en-JO")} JOD</span></div>
+        <div className="summary-row"><span>Delivery</span><span>{shipping ? `${shipping} JOD` : "Free"}</span></div>
+        <p className="free-ship-note">
+          {subtotal > 0 && subtotal < storeSettings.freeShippingThreshold
+            ? `Add ${(storeSettings.freeShippingThreshold - subtotal).toLocaleString("en-JO")} JOD for free delivery.`
+            : "Complimentary insured delivery applies."}
+        </p>
+        <div className="summary-row total"><span>Total</span><span>{total.toLocaleString("en-JO")} JOD</span></div>
         <form className="checkout-form" onSubmit={submitOrder}>
-          <label>Name<input name="name" required /></label>
-          <label>Phone<input name="phone" required /></label>
-          <label>Email<input name="email" type="email" /></label>
-          <label>City<select name="city">{storeSettings.cities.map((city) => <option key={city}>{city}</option>)}</select></label>
-          <label>Address<textarea name="address" required rows={3} /></label>
-          <label>Payment<select name="payment"><option value="cod">Cash on delivery</option><option value="cliq">CliQ / bank transfer</option><option value="whatsapp">WhatsApp order</option></select></label>
-          <label>Notes<textarea name="notes" rows={3} /></label>
-          <button className="btn btn-solid" type="submit" disabled={!lines.length}>Place order</button>
+          <div className="field"><label htmlFor="co-name">Full name</label><input id="co-name" name="name" required autoComplete="name" /></div>
+          <div className="row-2">
+            <div className="field"><label htmlFor="co-phone">Phone</label><input id="co-phone" name="phone" required placeholder="07X XXX XXXX" autoComplete="tel" /></div>
+            <div className="field"><label htmlFor="co-city">City</label><select id="co-city" name="city">{storeSettings.cities.map((city) => <option key={city}>{city}</option>)}</select></div>
+          </div>
+          <div className="field"><label htmlFor="co-email">Email (for your invoice)</label><input id="co-email" name="email" type="email" placeholder="you@example.com" /></div>
+          <div className="field"><label htmlFor="co-address">Delivery address</label><textarea id="co-address" name="address" required rows={2} /></div>
+          <div className="field">
+            <label>Payment</label>
+            <div className="pay-options">
+              <label className="pay-option"><input defaultChecked name="payment" type="radio" value="cod" /><span>Cash on delivery<small>40% deposit required to confirm. Remaining 60% paid to the courier on delivery.</small></span></label>
+              <label className="pay-option"><input name="payment" type="radio" value="cliq" /><span>CliQ / bank transfer<small>Pay a 40% deposit via CliQ to confirm. Remaining 60% before/at delivery.</small></span></label>
+              <label className="pay-option"><input name="payment" type="radio" value="whatsapp" /><span>Confirm via WhatsApp<small>Send your order straight to the atelier</small></span></label>
+              <label className="pay-option"><input name="payment" type="radio" value="card" /><span>Card — Visa / Mastercard<small>We send you a secure payment link after confirming your order</small></span></label>
+            </div>
+            <p style={{ fontSize: "0.76rem", color: "var(--muted)", marginTop: "0.65rem" }}>
+              Confirmation deposit due now: {deposit.toLocaleString("en-JO")} JOD (40%). Remaining: {balance.toLocaleString("en-JO")} JOD.
+            </p>
+            <p style={{ fontSize: "0.76rem", color: "var(--muted)", marginTop: "0.35rem" }}>
+              Deposit payment aliases: <strong>MosporD</strong> or <strong>00962797157007</strong>.
+            </p>
+          </div>
+          <div className="field"><label htmlFor="co-notes">Notes (engraving, sizing, gift wrap)</label><textarea id="co-notes" name="notes" rows={2} /></div>
+          <button className="btn btn-gold btn-wide" type="submit" disabled={!lines.length}>Place order</button>
+          <p style={{ fontSize: "0.76rem", color: "var(--muted)", textAlign: "center" }}>
+            Every order is confirmed personally by the atelier before dispatch.
+          </p>
           {status ? <p className="form-status">{status}</p> : null}
         </form>
       </aside>
     </div>
+    </>
   );
 }

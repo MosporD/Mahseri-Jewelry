@@ -1,10 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useCart } from "./cart-provider";
 
 export function SiteHeader() {
   const { count } = useCart();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  function navClass(href: string) {
+    if (href === "/" && pathname === "/") return "active";
+    if (href !== "/" && pathname.startsWith(href)) return "active";
+    return undefined;
+  }
+
+  useEffect(() => {
+    document.body.classList.toggle("nav-open", open);
+    return () => document.body.classList.remove("nav-open");
+  }, [open]);
 
   return (
     <header className="site-header">
@@ -21,11 +36,11 @@ export function SiteHeader() {
             <small>Jewellery</small>
           </span>
         </Link>
-        <nav className="site-nav" aria-label="Main navigation">
-          <Link href="/">Home</Link>
-          <Link href="/shop">Shop</Link>
-          <Link href="/about">Our Story</Link>
-          <Link href="/contact">Contact</Link>
+        <nav className={`site-nav${open ? " open" : ""}`} aria-label="Main navigation">
+          <Link className={navClass("/")} href="/" onClick={() => setOpen(false)}>Home</Link>
+          <Link className={navClass("/shop")} href="/shop" onClick={() => setOpen(false)}>Shop</Link>
+          <Link className={navClass("/about")} href="/about" onClick={() => setOpen(false)}>Our Story</Link>
+          <Link className={navClass("/contact")} href="/contact" onClick={() => setOpen(false)}>Contact</Link>
         </nav>
         <div className="nav-actions">
           <Link className="cart-button" href="/cart" aria-label="Open cart">
@@ -35,6 +50,17 @@ export function SiteHeader() {
             </svg>
             <span className="cart-count">{count}</span>
           </Link>
+          <button
+            className={`menu-toggle${open ? " open" : ""}`}
+            aria-label="Open menu"
+            aria-expanded={open}
+            onClick={() => setOpen((value) => !value)}
+            type="button"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </div>
     </header>

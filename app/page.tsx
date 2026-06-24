@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
+import { MaterialGuide } from "@/components/material-guide";
 import { ProductCard } from "@/components/product-card";
+import { Testimonials } from "@/components/testimonials";
 import { getProducts } from "@/src/lib/catalog";
 import { getMetalSpot } from "@/src/lib/pricing";
 import { categories } from "@/src/lib/seed-data";
@@ -112,21 +114,20 @@ export default async function HomePage() {
         <div className="container hero-grid">
           <div>
             <p className="eyebrow">Amman atelier · since 1989</p>
-            <h1>
-              Handcrafted jewellery with <em>honest live metal pricing</em>
-            </h1>
+            <h1>Gold that carries <em>your story</em> forward.</h1>
             <p className="hero-text">
-              Gold, silver, and gems crafted by Mahseri Jewellery with transparent pricing,
-              insured delivery across Jordan, and lifetime atelier care.
+              From our family workshop in the heart of Amman, Mahseri crafts jewellery in
+              21K and 18K gold and 925 silver — pure metal, modern silhouettes,
+              and a finish that only patient hands can give.
             </p>
             <div className="hero-actions">
-              <Link className="btn btn-solid" href="/shop/gold">Shop gold</Link>
-              <Link className="btn btn-ghost" href="/shop/silver">Shop silver</Link>
+              <Link className="btn btn-solid" href="/shop">Explore the collection</Link>
+              <Link className="btn btn-outline" href="/about">Our craft</Link>
             </div>
             <div className="hero-stats">
-              <div><strong>1989</strong><span>Family atelier</span></div>
-              <div><strong>21K</strong><span>Regional gold</span></div>
-              <div><strong>925</strong><span>Sterling silver</span></div>
+              <div><strong>35+</strong><span>Years of craft</span></div>
+              <div><strong>100%</strong><span>Made in-house</span></div>
+              <div><strong>2yr</strong><span>Gold warranty</span></div>
             </div>
           </div>
           <div className="hero-visual">
@@ -226,26 +227,7 @@ export default async function HomePage() {
             <p className="eyebrow">Know your metal</p>
             <h2>An honest guide to what you wear</h2>
           </div>
-          <div className="material-panel active">
-            <div>
-              <h3>21K — The regional signature</h3>
-              <p>
-                The classic standard of Jordanian gold. Rich colour with everyday resilience,
-                priced from live metal data and finished by hand.
-              </p>
-              <ul className="material-meta">
-                <li><span>Purity</span><b>88.5% gold</b></li>
-                <li><span>Tone</span><b>Rich yellow</b></li>
-                <li><span>Best for</span><b>Chains, bracelets, daily luxury</b></li>
-              </ul>
-              <div className="purity-bar"><i style={{ width: "88.5%" }} /></div>
-            </div>
-            <div className="material-swatch">
-              <div className="coin" style={{ background: "radial-gradient(circle at 32% 28%, #ffeec0, #e3b652 55%, #b78c33)" }}>
-                21
-              </div>
-            </div>
-          </div>
+          <MaterialGuide />
         </div>
       </section>
 
@@ -278,16 +260,7 @@ export default async function HomePage() {
             <p className="eyebrow">Word of mouth</p>
             <h2>Loved across Jordan</h2>
           </div>
-          <div className="testimonial-stage">
-            <article className="testimonial active">
-              <p className="stars">★★★★★</p>
-              <blockquote>
-                “The 21K bracelet I ordered is heavier and finer than anything I found in the souq.
-                You can feel the hand work in every link.”
-              </blockquote>
-              <cite>Mahseri customer — Amman</cite>
-            </article>
-          </div>
+          <Testimonials />
         </div>
       </section>
 
