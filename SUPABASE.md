@@ -18,8 +18,17 @@ Run the SQL files in order from `supabase/migrations` in the Supabase SQL editor
 
 1. `001_initial_schema.sql`
 2. `002_admin_policies.sql`
+3. `003_admin_users.sql`
 
-Then set an auth user for the owner/admin account. Use the same email in `ADMIN_EMAIL`.
+Then add your owner/admin email:
+
+```sql
+insert into public.admin_users (email)
+values ('your-admin-email@example.com')
+on conflict (email) do nothing;
+```
+
+Create a Supabase Auth user for the same email. Use the same email in `ADMIN_EMAIL` for the server-side API guard.
 
 ## 3. Environment Variables
 
