@@ -1,0 +1,171 @@
+import type { Product } from "./types";
+
+export const categories = [
+  "Necklaces",
+  "Rings",
+  "Bracelets",
+  "Earrings",
+  "Brooches",
+  "Nose Jewellery",
+  "Anklets",
+  "Leg Chains",
+  "Navel Rings",
+  "Full Set",
+  "Half Set",
+  "3 Piece Set"
+];
+
+export const gemTypes = [
+  "Ruby",
+  "Emerald",
+  "Sapphire",
+  "Diamond",
+  "Pearl",
+  "Semi-Precious"
+];
+
+export const storeSettings = {
+  currency: "JOD",
+  freeShippingThreshold: 300,
+  shippingFlat: 5,
+  phone: "+962 7 9715 7007",
+  whatsapp: "962797157007",
+  email: "mahserijewellery@gmail.com",
+  address: "Madaba ST - Wehdat - Amman - Jordan",
+  cities: [
+    "Amman",
+    "Zarqa",
+    "Irbid",
+    "Aqaba",
+    "Madaba",
+    "Salt",
+    "Jerash",
+    "Ajloun",
+    "Karak",
+    "Mafraq",
+    "Tafilah",
+    "Ma'an"
+  ]
+};
+
+export const seedProducts: Product[] = [
+  {
+    id: "flower-oval-rolo-bracelet",
+    sku: "SKU-0001",
+    name: "Gold Bracelet — edit name",
+    collection: "gold",
+    category: "Bracelets",
+    material: "21K Gold",
+    gender: "Her",
+    price: 2600,
+    weight: "40 g",
+    making_fee: 0,
+    badge: null,
+    art: "bangle",
+    in_stock: true,
+    image: "/assets/Products/gold/bracelets/Flower Oval Rolo Bracelet.jpeg",
+    description: "Edit description in admin."
+  },
+  {
+    id: "gold-half-lira-bracelet-paper-clip",
+    sku: "SKU-0002",
+    name: "Gold Bracelet — edit name",
+    collection: "gold",
+    category: "Bracelets",
+    material: "21K Gold",
+    gender: "Her",
+    price: 2600,
+    weight: "40 g",
+    making_fee: 0,
+    badge: null,
+    art: "bangle",
+    in_stock: true,
+    image: "/assets/Products/gold/bracelets/Gold Half Lira Bracelet Paper Clip.jpeg",
+    description: "Edit description in admin."
+  },
+  {
+    id: "gold-quarter-lira-bracelet-paper-clip",
+    sku: "SKU-0003",
+    name: "Gold Bracelet — edit name",
+    collection: "gold",
+    category: "Bracelets",
+    material: "21K Gold",
+    gender: "Her",
+    price: 2600,
+    weight: "40 g",
+    making_fee: 0,
+    badge: null,
+    art: "bangle",
+    in_stock: true,
+    image: "/assets/Products/gold/bracelets/Gold Quarter Lira Bracelet Paper Clip.jpeg",
+    description: "Edit description in admin."
+  },
+  {
+    id: "oval-rolo-bracelet",
+    sku: "SKU-0004",
+    name: "Gold Bracelet — edit name",
+    collection: "gold",
+    category: "Bracelets",
+    material: "21K Gold",
+    gender: "Her",
+    price: 2600,
+    weight: "40 g",
+    making_fee: 0,
+    badge: null,
+    art: "bangle",
+    in_stock: true,
+    image: "/assets/Products/gold/bracelets/Oval Rolo Bracelet.jpeg",
+    description: "Edit description in admin."
+  },
+  {
+    id: "stacked-gold-half-liras-bracelet",
+    sku: "SKU-0005",
+    name: "Gold Bracelet — edit name",
+    collection: "gold",
+    category: "Bracelets",
+    material: "21K Gold",
+    gender: "Her",
+    price: 2600,
+    weight: "40 g",
+    making_fee: 0,
+    badge: null,
+    art: "bangle",
+    in_stock: true,
+    image: "/assets/Products/gold/bracelets/Stacked Gold Half Liras Bracelet.jpeg",
+    description: "Edit description in admin."
+  },
+  {
+    id: "stacked-gold-liras-bracelet",
+    sku: "SKU-0006",
+    name: "Gold Bracelet — edit name",
+    collection: "gold",
+    category: "Bracelets",
+    material: "21K Gold",
+    gender: "Her",
+    price: 2600,
+    weight: "40 g",
+    making_fee: 0,
+    badge: null,
+    art: "bangle",
+    in_stock: true,
+    image: "/assets/Products/gold/bracelets/Stacked Gold Liras Bracelet.jpeg",
+    description: "Edit description in admin."
+  },
+  {
+    id: "stacked-gold-quarter-liras-bracelet",
+    sku: "SKU-0007",
+    name: "Gold Bracelet — edit name",
+    collection: "gold",
+    category: "Bracelets",
+    material: "21K Gold",
+    gender: "Her",
+    price: 2600,
+    weight: "40 g",
+    making_fee: 0,
+    badge: null,
+    art: "bangle",
+    in_stock: true,
+    image: "/assets/Products/gold/bracelets/Stacked Gold Quarter Liras Bracelet.jpeg",
+    description: "Edit description in admin."
+  }
+];

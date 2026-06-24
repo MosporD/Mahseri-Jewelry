@@ -8,3 +8,9 @@ scripts/telegram-scheduled-products.json
 !.dev.vars.example
 .env*
 !.env.example
+
+# dependencies and generated app output
+node_modules/
+.next/
+.vercel/
+tsconfig.tsbuildinfo

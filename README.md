@@ -1,42 +1,53 @@
 # Mahseri Jewellery
 
-A multi-page e-commerce storefront for **Mahseri Jewellery**, a family jewellery atelier in
-Amman, Jordan. Built as a fully static site — no build step, no backend — so it can be hosted
-on GitHub Pages or any static host.
+A Next.js storefront and admin app for **Mahseri Jewellery**, a family jewellery atelier in
+Amman, Jordan. The app is designed for Vercel hosting with Supabase for product data,
+product images, admin authentication, and orders.
 
-## Pages
+## Current Stack
 
-| Page | Purpose |
+- `app/` — Next.js App Router pages and API routes.
+- `components/` — React UI for site chrome, cart, products, and admin.
+- `src/lib/` — Supabase, catalogue, pricing, order, and type helpers.
+- `supabase/migrations/` — database/storage schema for products, orders, and admin policies.
+- `css/style.css` — existing design system reused by the React app.
+- `js/`, root `*.html`, and `dist/` — legacy static implementation kept as reference during migration.
+
+## Routes
+
+| Route | Purpose |
 | --- | --- |
-| `index.html` | Home — hero, collections, featured pieces, interactive material guide, services, testimonials |
-| `shop.html` | Full catalogue with live category/metal filters and sorting |
-| `product.html?id=…` | Product detail — zoomable artwork, specs, size guide, quantity, related pieces |
-| `cart.html` | Bag review and checkout (cash on delivery, CliQ, or WhatsApp order) |
-| `about.html` | House story, animated stats, timeline, values |
-| `contact.html` | Contact form, atelier hours, map, FAQ |
+| `/` | Home, collection entry points, featured products |
+| `/shop` | Collection hub |
+| `/shop/gold`, `/shop/silver`, `/shop/gems` | Product listings with filters and live metal pricing |
+| `/product/[id]` | Product detail and related pieces |
+| `/cart` | Cart and checkout |
+| `/admin` | Supabase-authenticated catalogue management |
+| `/api/orders` | Server-side order creation and notification |
+| `/api/admin/*` | Protected product and image management APIs |
 
-## E-commerce features
-
-- Persistent shopping bag stored in `localStorage`, shared across all pages
-- Slide-out bag drawer with quantity controls available site-wide
-- Pricing in Jordanian Dinar (JOD) with free-delivery threshold logic
-- Checkout flow with Jordanian cities, cash-on-delivery / CliQ / WhatsApp order options
-- Order confirmation with generated order number
-
-## Stack
-
-Plain HTML, CSS and vanilla JavaScript.
-
-- `css/style.css` — design system (Cormorant Garamond + Jost, ivory/charcoal/gold palette)
-- `js/data.js` — product catalogue and store settings (edit here to change products, prices, contact details)
-- `js/app.js` — cart engine, shared UI chrome, and per-page behaviour
-
-## Running locally
-
-Serve the folder with any static server, e.g.:
+## Running Locally
 
 ```bash
-python3 -m http.server 8000
+npm install
+npm run dev
 ```
 
-then open <http://localhost:8000>.
+Then open <http://localhost:3000>.
+
+The app works with seed products if Supabase env vars are missing. To use the database, copy
+`.env.example` to `.env.local`, fill the Supabase values, apply `supabase/migrations`, then run:
+
+```bash
+npm run import:products
+```
+
+## Verification
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
+
+See `SUPABASE.md` and `VERCEL.md` for setup and deployment details.

@@ -1,13 +1,29 @@
 {
   "scripts": {
-    "build": "node scripts/build-dist.js",
-    "deploy": "npm run build && wrangler deploy",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "build:static": "node scripts/build-dist.js",
+    "deploy": "npm run build",
+    "import:products": "node scripts/import-products-to-supabase.js",
     "upload:supabase-products": "node scripts/upload-supabase-products.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.87.1"
+    "@supabase/ssr": "^0.12.0",
+    "@supabase/supabase-js": "^2.87.1",
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
+    "@types/node": "^26.0.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.9",
+    "typescript": "^6.0.3",
     "wrangler": "^4.101.0"
   }
 }

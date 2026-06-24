@@ -232,10 +232,10 @@ const MAHSERI_STORE = {
    Full setup steps are in SETUP-GUIDE.md at the project root. */
 const MAHSERI_NOTIFY = {
   telegram: {
-    enabled: true,
-    botToken: "8943736269:AAFzqxcT2eYIvanCrmF_svfqtLodaNkxjQg",
-    chatId: "5306835048",
-    channelId: "-1004372771709",
+    enabled: false,
+    botToken: "",
+    chatId: "",
+    channelId: "",
     siteUrl: "https://mahserijewellery.com",
     metalAlerts: {
       enabled: true,
@@ -243,10 +243,10 @@ const MAHSERI_NOTIFY = {
     }
   },
   emailjs: {
-    enabled: true,
-    publicKey: "Qzlv3YiOFEdma-qKK",
-      serviceId: "service_0cdrg8n",
-      templateId: "template_wt1mexr"
+    enabled: false,
+    publicKey: "",
+      serviceId: "",
+      templateId: ""
   }
 };
 

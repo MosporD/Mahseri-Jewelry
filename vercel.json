@@ -1,0 +1,14 @@
+{
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/shop.html", "destination": "/shop", "permanent": true },
+    { "source": "/shop-gold.html", "destination": "/shop/gold", "permanent": true },
+    { "source": "/shop-silver.html", "destination": "/shop/silver", "permanent": true },
+    { "source": "/shop-gems.html", "destination": "/shop/gems", "permanent": true },
+    { "source": "/about.html", "destination": "/about", "permanent": true },
+    { "source": "/contact.html", "destination": "/contact", "permanent": true },
+    { "source": "/cart.html", "destination": "/cart", "permanent": true },
+    { "source": "/admin.html", "destination": "/admin", "permanent": true },
+    { "source": "/product.html", "destination": "/product", "permanent": false }
+  ]
+}
