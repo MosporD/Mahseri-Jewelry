@@ -20,7 +20,7 @@ const categoryBlurbs: Record<string, string> = {
   "3 Piece Set": "Ring, chain & earrings"
 };
 
-const categoryArt: Record<string, string> = {
+const categoryArtAssets: Record<string, string> = {
   Brooches: "/assets/art/brooch.svg",
   "Nose Jewellery": "/assets/art/nose.svg",
   Anklets: "/assets/art/anklet.svg",
@@ -30,6 +30,74 @@ const categoryArt: Record<string, string> = {
   "Half Set": "/assets/art/half-set.svg",
   "3 Piece Set": "/assets/art/three-piece-set.svg"
 };
+
+function CategoryArt({ category }: { category: string }) {
+  const stroke = "#c6a35c";
+  const soft = "rgba(198,163,92,0.45)";
+
+  if (category === "Necklaces") {
+    return (
+      <svg viewBox="0 0 200 200" fill="none" aria-hidden="true">
+        <path d="M30 32 C45 105 75 130 100 134 C125 130 155 105 170 32" stroke={stroke} strokeWidth="4" strokeLinecap="round" />
+        <path d="M40 32 C53 98 78 122 100 126 C122 122 147 98 160 32" stroke={soft} strokeWidth="1.6" />
+        <circle cx="100" cy="148" r="13" stroke={stroke} strokeWidth="4" />
+        <path d="M100 134 L100 136" stroke={stroke} strokeWidth="4" />
+        <path d="M95 168 L100 180 L105 168" stroke={stroke} strokeWidth="3" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  if (category === "Rings") {
+    return (
+      <svg viewBox="0 0 200 200" fill="none" aria-hidden="true">
+        <circle cx="100" cy="118" r="52" stroke={stroke} strokeWidth="7" />
+        <circle cx="100" cy="118" r="40" stroke={soft} strokeWidth="1.5" />
+        <path d="M78 64 L100 34 L122 64 L100 80 Z" stroke={stroke} strokeWidth="4" strokeLinejoin="round" />
+        <path d="M78 64 L122 64" stroke={stroke} strokeWidth="3" />
+        <path d="M100 34 L93 64 M100 34 L107 64" stroke={soft} strokeWidth="1.5" />
+      </svg>
+    );
+  }
+
+  if (category === "Bracelets") {
+    return (
+      <svg viewBox="0 0 200 200" fill="none" aria-hidden="true">
+        <circle cx="100" cy="100" r="62" stroke={stroke} strokeWidth="8" />
+        <circle cx="100" cy="100" r="48" stroke={soft} strokeWidth="1.6" />
+        <circle cx="100" cy="38" r="7" fill={stroke} />
+        <circle cx="156" cy="120" r="5" fill={soft} />
+      </svg>
+    );
+  }
+
+  if (category === "Earrings") {
+    return (
+      <svg viewBox="0 0 200 200" fill="none" aria-hidden="true">
+        <path d="M62 34 a9 9 0 1 1 0.1 0" stroke={stroke} strokeWidth="3" />
+        <path d="M62 50 L62 76" stroke={stroke} strokeWidth="3" />
+        <circle cx="62" cy="116" r="38" stroke={stroke} strokeWidth="5" />
+        <path d="M138 34 a9 9 0 1 1 0.1 0" stroke={stroke} strokeWidth="3" />
+        <path d="M138 50 L138 70" stroke={stroke} strokeWidth="3" />
+        <path d="M138 70 L120 130 L156 130 Z" stroke={stroke} strokeWidth="4" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+
+  const asset = categoryArtAssets[category];
+  if (asset) {
+    return <Image className="art-line" src={asset} alt="" width={180} height={180} />;
+  }
+
+  return (
+    <svg viewBox="0 0 200 200" fill="none" aria-hidden="true">
+      <path d="M52 26 C70 70 86 84 100 88 C114 84 130 70 148 26" stroke={stroke} strokeWidth="3.4" strokeLinecap="round" />
+      <rect x="78" y="98" width="44" height="58" stroke={stroke} strokeWidth="4" />
+      <rect x="86" y="108" width="28" height="38" stroke={soft} strokeWidth="1.6" />
+      <path d="M100 88 L100 98" stroke={stroke} strokeWidth="3" />
+      <path d="M78 127 H122" stroke={soft} strokeWidth="1.6" />
+    </svg>
+  );
+}
 
 export default async function HomePage() {
   const [products, spot] = await Promise.all([
@@ -119,21 +187,7 @@ export default async function HomePage() {
                 key={category}
               >
                 <div className="cc-art">
-                  {categoryArt[category] ? (
-                    <Image
-                      className="art-line"
-                      src={categoryArt[category]}
-                      alt=""
-                      width={180}
-                      height={180}
-                    />
-                  ) : (
-                    <span className="monogram">
-                      <em>
-                        M<b>J</b>
-                      </em>
-                    </span>
-                  )}
+                  <CategoryArt category={category} />
                 </div>
                 <div className="cc-veil" />
                 <div className="cc-info">

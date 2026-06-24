@@ -8,7 +8,7 @@ export function SiteHeader() {
 
   return (
     <header className="site-header">
-      <div className="announce">Insured delivery · 14-day exchange · Live gold pricing</div>
+      <p className="announce">Complimentary insured delivery across Jordan on orders over 300 JOD</p>
       <div className="container nav-shell">
         <Link className="brand" href="/">
           <span className="monogram">
@@ -22,16 +22,18 @@ export function SiteHeader() {
           </span>
         </Link>
         <nav className="site-nav" aria-label="Main navigation">
+          <Link href="/">Home</Link>
           <Link href="/shop">Shop</Link>
-          <Link href="/shop/gold">Gold</Link>
-          <Link href="/shop/silver">Silver</Link>
-          <Link href="/shop/gems">Gems</Link>
           <Link href="/about">Our Story</Link>
           <Link href="/contact">Contact</Link>
         </nav>
         <div className="nav-actions">
           <Link className="cart-button" href="/cart" aria-label="Open cart">
-            Bag <span className="cart-count">{count}</span>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" aria-hidden="true">
+              <path d="M6 8h12l1 13H5L6 8z" />
+              <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+            </svg>
+            <span className="cart-count">{count}</span>
           </Link>
         </div>
       </div>

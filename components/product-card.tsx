@@ -10,7 +10,7 @@ export function ProductCard({ product, spot }: { product: Product; spot: MetalSp
   const inStock = product.in_stock ?? product.inStock ?? true;
 
   return (
-    <article className={`product-card reveal${inStock ? "" : " pc-out-of-stock"}`}>
+    <article className={`product-card${inStock ? "" : " pc-out-of-stock"}`}>
       <div className="pc-media">
         {product.badge ? <span className="pc-badge">{product.badge}</span> : null}
         <Link href={`/product/${product.id}`} aria-label={product.name}>
