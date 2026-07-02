@@ -1,7 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Craftsmanship } from "@/components/craftsmanship";
 import { MaterialGuide } from "@/components/material-guide";
+import { OrnamentDivider } from "@/components/ornament-divider";
 import { ProductCard } from "@/components/product-card";
+import { ScrollRing } from "@/components/scroll-ring";
 import { Testimonials } from "@/components/testimonials";
 import { getProducts } from "@/src/lib/catalog";
 import { getMetalSpot } from "@/src/lib/pricing";
@@ -110,6 +113,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <ScrollRing />
       <section className="hero">
         <div className="container hero-grid">
           <div>
@@ -218,6 +222,7 @@ export default async function HomePage() {
               View the full collection <span>→</span>
             </Link>
           </p>
+          <OrnamentDivider />
         </div>
       </section>
 
@@ -228,6 +233,12 @@ export default async function HomePage() {
             <h2>An honest guide to what you wear</h2>
           </div>
           <MaterialGuide />
+        </div>
+      </section>
+
+      <section className="section section-tinted craft-section">
+        <div className="container">
+          <Craftsmanship />
         </div>
       </section>
 
@@ -266,6 +277,7 @@ export default async function HomePage() {
 
       <section className="section cta-band">
         <div className="container">
+          <OrnamentDivider />
           <p className="eyebrow">Begin your piece</p>
           <h2>Made for moments that matter</h2>
           <p>Browse the collection online, or visit the atelier in downtown Amman for a private viewing.</p>
