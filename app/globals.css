@@ -82,3 +82,176 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Prestige ornaments ---------- */
+
+.scroll-ring {
+  position: fixed;
+  right: clamp(1.2rem, 2.5vw, 3rem);
+  top: 50%;
+  translate: 0 -50%;
+  width: 132px;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.85;
+  display: none;
+}
+
+.scroll-ring svg {
+  width: 100%;
+  height: auto;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.scroll-ring-halo {
+  position: absolute;
+  inset: -14px;
+  border: 1px dashed var(--line-gold);
+  border-radius: 50%;
+}
+
+@media (min-width: 1400px) {
+  .scroll-ring {
+    display: block;
+  }
+}
+
+.ornament-divider {
+  display: flex;
+  justify-content: center;
+  padding: 3.2rem 0 0;
+}
+
+.ornament-divider svg {
+  width: min(360px, 70vw);
+  height: 26px;
+}
+
+.cta-band .ornament-divider {
+  padding: 0 0 2.6rem;
+}
+
+.craft-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.hallmark-seal-wrap {
+  flex: none;
+  width: 158px;
+}
+
+.hallmark-seal {
+  width: 100%;
+  height: auto;
+}
+
+.seal-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: seal-rotate 36s linear infinite;
+}
+
+@keyframes seal-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.craft-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2.2rem;
+  position: relative;
+}
+
+.craft-grid::before {
+  content: "";
+  position: absolute;
+  top: 45px;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--line-gold) 14%,
+    var(--line-gold) 86%,
+    transparent
+  );
+}
+
+.craft-step {
+  text-align: center;
+  position: relative;
+}
+
+.craft-step .craft-icon {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 1.4rem;
+  border: 1px solid var(--line-gold);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--ivory-2);
+  box-shadow: 0 0 0 6px var(--ivory-2);
+}
+
+.craft-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.craft-step .step-no {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.38em;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+}
+
+.craft-step h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.55rem;
+}
+
+.craft-step p {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+@media (max-width: 960px) {
+  .craft-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem 1.6rem;
+  }
+
+  .craft-grid::before {
+    display: none;
+  }
+
+  .craft-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hallmark-seal-wrap {
+    display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .craft-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seal-spin {
+    animation: none;
+  }
+}
