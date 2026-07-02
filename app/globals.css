@@ -83,38 +83,235 @@
   }
 }
 
-/* ---------- Prestige ornaments ---------- */
+/* ---------- Cinematic 3D hero ---------- */
 
-.scroll-ring {
-  position: fixed;
-  right: clamp(1.2rem, 2.5vw, 3rem);
+.cine-hero {
+  position: relative;
+  height: 320vh;
+  background: var(--charcoal);
+}
+
+.cine-hero.cine-static {
+  height: 100vh;
+  min-height: 640px;
+}
+
+.cine-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 560px;
+  overflow: hidden;
+}
+
+.cine-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1000px 620px at 70% 42%, rgba(185, 151, 79, 0.18), transparent 65%),
+    radial-gradient(700px 500px at 18% 85%, rgba(185, 151, 79, 0.08), transparent 60%),
+    var(--charcoal);
+}
+
+.cine-canvas,
+.cine-canvas canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cine-canvas canvas {
+  cursor: grab;
+}
+
+.cine-canvas canvas:active {
+  cursor: grabbing;
+}
+
+.cine-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(125% 95% at 50% 46%, transparent 55%, rgba(6, 5, 3, 0.6));
+  pointer-events: none;
+}
+
+.cine-copy {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cine-phase {
+  position: absolute;
   top: 50%;
   translate: 0 -50%;
-  width: 132px;
-  z-index: 3;
-  pointer-events: none;
-  opacity: 0.85;
-  display: none;
+  left: max(6vw, calc((100vw - 1200px) / 2));
+  max-width: 560px;
+  will-change: opacity, transform;
 }
 
-.scroll-ring svg {
-  width: 100%;
-  height: auto;
-  transform-origin: 50% 50%;
-  will-change: transform;
+.cine-phase .eyebrow {
+  color: var(--gold-light);
 }
 
-.scroll-ring-halo {
+.cine-phase h1,
+.cine-phase h2 {
+  color: var(--ivory);
+  font-size: clamp(2.5rem, 5.2vw, 4.4rem);
+  line-height: 1.05;
+}
+
+.cine-phase h1 em,
+.cine-phase h2 em {
+  color: var(--gold-light);
+  font-style: italic;
+}
+
+.cine-lead {
+  margin: 1.4rem 0 2.2rem;
+  max-width: 460px;
+  color: #b3a98f;
+}
+
+.cine-stats {
+  display: flex;
+  gap: 3rem;
+  margin-top: 2.4rem;
+}
+
+.cine-stats strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  font-weight: 500;
+  color: var(--ivory);
+}
+
+.cine-stats span {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #8d8368;
+}
+
+.cine-cue {
   position: absolute;
-  inset: -14px;
-  border: 1px dashed var(--line-gold);
-  border-radius: 50%;
+  bottom: 2.2rem;
+  left: 50%;
+  translate: -50% 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: #8d8368;
+  pointer-events: none;
 }
 
-@media (min-width: 1400px) {
-  .scroll-ring {
-    display: block;
+.cine-cue::after {
+  content: "";
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(var(--gold), transparent);
+  animation: cine-cue-drop 2.2s var(--ease) infinite;
+}
+
+@keyframes cine-cue-drop {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
   }
+  55% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+.cine-hint {
+  position: absolute;
+  right: clamp(2rem, 9vw, 10rem);
+  bottom: 3.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid rgba(216, 188, 126, 0.35);
+  border-radius: 999px;
+  font-size: 0.66rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  pointer-events: none;
+  transition: opacity 0.8s var(--ease);
+}
+
+.cine-hint-icon {
+  font-size: 0.95rem;
+  animation: cine-hint-spin 4s linear infinite;
+}
+
+@keyframes cine-hint-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cine-hint-hide {
+  opacity: 0;
+}
+
+@media (max-width: 900px) {
+  .cine-hero {
+    height: 280vh;
+  }
+
+  .cine-phase {
+    left: 6vw;
+    right: 6vw;
+    max-width: none;
+  }
+
+  .cine-phase h1,
+  .cine-phase h2 {
+    font-size: clamp(2.1rem, 9vw, 3rem);
+  }
+
+  .cine-stats {
+    gap: 1.8rem;
+  }
+
+  .cine-hint {
+    right: 6vw;
+    bottom: 6.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cine-cue::after,
+  .cine-hint-icon {
+    animation: none;
+  }
+}
+
+/* ---------- Scroll reveal ---------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.9s var(--ease),
+    transform 0.9s var(--ease);
+}
+
+.reveal-in {
+  opacity: 1;
+  transform: none;
 }
 
 .ornament-divider {
