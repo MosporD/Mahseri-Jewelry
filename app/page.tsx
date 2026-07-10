@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
+import { CinematicHero } from "@/components/cinematic-hero";
 import { Craftsmanship } from "@/components/craftsmanship";
 import { MaterialGuide } from "@/components/material-guide";
 import { OrnamentDivider } from "@/components/ornament-divider";
 import { ProductCard } from "@/components/product-card";
-import { ScrollRing } from "@/components/scroll-ring";
+import { ScrollReveal } from "@/components/scroll-reveal";
 import { Testimonials } from "@/components/testimonials";
 import { getProducts } from "@/src/lib/catalog";
 import { getMetalSpot } from "@/src/lib/pricing";
@@ -113,51 +114,8 @@ export default async function HomePage() {
 
   return (
     <>
-      <ScrollRing />
-      <section className="hero">
-        <div className="container hero-grid">
-          <div>
-            <p className="eyebrow">Amman atelier · since 1989</p>
-            <h1>Gold that carries <em>your story</em> forward.</h1>
-            <p className="hero-text">
-              From our family workshop in the heart of Amman, Mahseri crafts jewellery in
-              21K and 18K gold and 925 silver — pure metal, modern silhouettes,
-              and a finish that only patient hands can give.
-            </p>
-            <div className="hero-actions">
-              <Link className="btn btn-solid" href="/shop">Explore the collection</Link>
-              <Link className="btn btn-outline" href="/about">Our craft</Link>
-            </div>
-            <div className="hero-stats">
-              <div><strong>35+</strong><span>Years of craft</span></div>
-              <div><strong>100%</strong><span>Made in-house</span></div>
-              <div><strong>2yr</strong><span>Gold warranty</span></div>
-            </div>
-          </div>
-          <div className="hero-visual">
-            <div className="hero-frame">
-              <div className="hero-viewer">
-                {featured.slice(0, 3).map((product, index) => (
-                  <div className={`hero-slide${index === 0 ? " active" : ""}`} key={product.id}>
-                    <Image
-                      src={product.image || "/assets/art/precious-stone.svg"}
-                      alt={product.name}
-                      width={900}
-                      height={1125}
-                      priority={index === 0}
-                    />
-                  </div>
-                ))}
-                <div className="hero-shine" />
-              </div>
-            </div>
-            <div className="hero-card">
-              <span className="dot" />
-              <p>Handcrafted to order · Amman</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ScrollReveal />
+      <CinematicHero />
 
       <div className="marquee" aria-hidden="true">
         <div className="marquee-track">
