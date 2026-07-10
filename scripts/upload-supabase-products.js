@@ -3,7 +3,7 @@ const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 
 const root = path.resolve(__dirname, "..");
-const productsDir = path.join(root, "assets", "Products");
+const productsDir = path.join(root, "public", "assets", "Products");
 
 const imageTypes = {
   ".jpg": "image/jpeg",

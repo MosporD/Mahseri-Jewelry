@@ -12,5 +12,6 @@ scripts/telegram-scheduled-products.json
 # dependencies and generated app output
 node_modules/
 .next/
+.open-next/
 .vercel/
 tsconfig.tsbuildinfo
