@@ -19,7 +19,8 @@ const rootFiles = [
   "sitemap.xml"
 ];
 
-const directories = ["assets", "css", "js"];
+const directories = ["css", "js"];
+const assetsSource = path.join("public", "assets");
 
 function copyFile(src, dest) {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
@@ -47,5 +48,7 @@ rootFiles.forEach((file) => {
 directories.forEach((dir) => {
   copyDirectory(path.join(root, dir), path.join(dist, dir));
 });
+
+copyDirectory(path.join(root, assetsSource), path.join(dist, "assets"));
 
 console.log(`Built ${path.relative(root, dist)} from static site files.`);
