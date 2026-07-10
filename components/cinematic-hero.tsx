@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { ConvexGeometry } from "three/examples/jsm/geometries/ConvexGeometry.js";
 
 const GOLD = 0xd4a441;
 
@@ -75,7 +76,9 @@ class InfinityCurve extends THREE.Curve<THREE.Vector3> {
   }
 }
 
-function buildRing() {
+type JewelryMaterials = ReturnType<typeof buildJewelryMaterials>;
+
+function buildJewelryMaterials() {
   const gold = new THREE.MeshPhysicalMaterial({
     color: GOLD,
     metalness: 1,
@@ -90,7 +93,8 @@ function buildRing() {
     roughness: 0.24,
     envMapIntensity: 1.15
   });
-  const diamond = new THREE.MeshPhysicalMaterial({
+  // Tiny pavé stones read best faceted hard
+  const paveDiamond = new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
     metalness: 0,
     roughness: 0,
@@ -103,7 +107,98 @@ function buildRing() {
     flatShading: true,
     transparent: true
   });
+  const brilliantDiamond = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    metalness: 0,
+    roughness: 0,
+    transmission: 0.9,
+    thickness: 1.4,
+    ior: 2.417,
+    dispersion: 0.35,
+    envMapIntensity: 3,
+    specularIntensity: 1,
+    transparent: true
+  });
+  return { gold, whiteGold, paveDiamond, brilliantDiamond };
+}
 
+/** Round brilliant cut as a convex hull: octagonal table, 16-sided girdle, culet. */
+function buildBrilliantGeometry(girdleRadius: number) {
+  const points: THREE.Vector3[] = [];
+  for (let i = 0; i < 8; i += 1) {
+    const a = ((i + 0.5) / 8) * Math.PI * 2;
+    points.push(
+      new THREE.Vector3(
+        Math.cos(a) * girdleRadius * 0.55,
+        girdleRadius * 0.47,
+        Math.sin(a) * girdleRadius * 0.55
+      )
+    );
+  }
+  for (let i = 0; i < 16; i += 1) {
+    const a = (i / 16) * Math.PI * 2;
+    const x = Math.cos(a) * girdleRadius;
+    const z = Math.sin(a) * girdleRadius;
+    points.push(new THREE.Vector3(x, girdleRadius * 0.06, z));
+    points.push(new THREE.Vector3(x, -girdleRadius * 0.06, z));
+  }
+  points.push(new THREE.Vector3(0, -girdleRadius * 1.24, 0));
+  return new ConvexGeometry(points);
+}
+
+/** Classic gold solitaire: D-profile shank, four-prong basket, brilliant-cut stone. */
+function buildSolitaireRing({ gold, brilliantDiamond }: JewelryMaterials) {
+  const ring = new THREE.Group();
+
+  // D-profile shank: a torus flattened front-to-back reads as a real band
+  const band = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.17, 48, 200), gold);
+  band.scale.z = 0.72;
+  ring.add(band);
+
+  const head = new THREE.Group();
+  head.position.y = 2.2;
+
+  const stone = new THREE.Mesh(buildBrilliantGeometry(0.34), brilliantDiamond);
+  head.add(stone);
+
+  // Four prongs rise from the basket and curve in over the girdle
+  for (let k = 0; k < 4; k += 1) {
+    const a = Math.PI / 4 + (k * Math.PI) / 2;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(cos * 0.42, -0.5, sin * 0.42),
+      new THREE.Vector3(cos * 0.45, -0.12, sin * 0.45),
+      new THREE.Vector3(cos * 0.3, 0.12, sin * 0.3)
+    ]);
+    const prong = new THREE.Mesh(new THREE.TubeGeometry(curve, 20, 0.04, 12), gold);
+    head.add(prong);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.048, 16, 12), gold);
+    tip.position.set(cos * 0.3, 0.12, sin * 0.3);
+    head.add(tip);
+  }
+
+  const rail = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.032, 16, 48), gold);
+  rail.rotation.x = Math.PI / 2;
+  rail.position.y = -0.5;
+  head.add(rail);
+
+  const lowerRail = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.028, 16, 48), gold);
+  lowerRail.rotation.x = Math.PI / 2;
+  lowerRail.position.y = -0.68;
+  head.add(lowerRail);
+
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.24, 0.34, 24), gold);
+  stem.position.y = -0.71;
+  head.add(stem);
+
+  ring.add(head);
+  ring.position.y = -0.85;
+  return ring;
+}
+
+/** The Mahseri infinity ring: open band bridged by a pavé-set figure eight. */
+function buildInfinityRing({ gold, whiteGold, paveDiamond }: JewelryMaterials) {
   const ring = new THREE.Group();
 
   // Thin open band leaving a gap at the top for the infinity link
@@ -148,7 +243,7 @@ function buildRing() {
   for (let i = 0; i < 15; i += 1) {
     const t = paveStart + ((i + 0.5) / 15) * (paveEnd - paveStart);
     const point = infinity.getPoint(t);
-    const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.045, 0), diamond);
+    const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.045, 0), paveDiamond);
     gem.position.set(point.x, point.y, 0.075);
     gem.rotation.set(Math.random(), Math.random(), Math.random());
     ring.add(gem);
@@ -230,17 +325,41 @@ export function CinematicHero() {
     rim.position.set(5, -2, -4);
     scene.add(rim);
 
+    // Two rings share the stage: each spins on its own axis inside a pivot,
+    // and the pivots ride a slowly turning "duet" carousel so the rings trade
+    // the front position as the visitor scrolls.
+    const materials = buildJewelryMaterials();
+    const orbitRadius = 1.15;
+
     const parallax = new THREE.Group();
-    const spin = new THREE.Group();
-    const ring = buildRing();
-    spin.add(ring);
-    parallax.add(spin);
+    const duet = new THREE.Group();
+
+    const infinitySpin = new THREE.Group();
+    infinitySpin.add(buildInfinityRing(materials));
+    const infinityPivot = new THREE.Group();
+    infinityPivot.position.set(-orbitRadius, 0.2, 0);
+    infinityPivot.scale.setScalar(0.62);
+    infinityPivot.add(infinitySpin);
+    duet.add(infinityPivot);
+
+    const solitaireSpin = new THREE.Group();
+    solitaireSpin.add(buildSolitaireRing(materials));
+    const solitairePivot = new THREE.Group();
+    solitairePivot.position.set(orbitRadius, -0.05, 0);
+    solitairePivot.scale.setScalar(0.54);
+    solitairePivot.add(solitaireSpin);
+    duet.add(solitairePivot);
+
+    parallax.add(duet);
     scene.add(parallax);
 
     const sparkles = buildSparkles();
     scene.add(sparkles);
 
     let wide = true;
+    // Wide screens spread the pair side by side; narrow ones stack them in
+    // depth so both fit the portrait frame.
+    let duetBase = -0.42;
     const resize = () => {
       const { clientWidth: w, clientHeight: h } = host;
       if (!w || !h) return;
@@ -248,7 +367,9 @@ export function CinematicHero() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       wide = w > 900;
-      parallax.position.x = wide ? 1.55 : 0;
+      parallax.position.x = wide ? 1.75 : 0;
+      parallax.position.y = wide ? 0 : 0.9;
+      duetBase = wide ? -0.42 : -1.18;
     };
     resize();
     const observer = new ResizeObserver(resize);
@@ -325,12 +446,14 @@ export function CinematicHero() {
         dragVelocity *= 0.94;
       }
 
-      spin.rotation.y = idle + dragOffset + p * Math.PI * 3;
+      duet.rotation.y = duetBase + idle * 0.15 + dragOffset * 0.35 + p * Math.PI;
+      infinitySpin.rotation.y = idle + dragOffset + p * Math.PI * 2;
+      solitaireSpin.rotation.y = 0.6 + idle * 1.2 + dragOffset + p * Math.PI * 2;
       parallax.rotation.x += (0.5 - p * 0.62 + tiltTargetX - parallax.rotation.x) * 0.06;
       parallax.rotation.y += (tiltTargetY - parallax.rotation.y) * 0.06;
-      const scale = (wide ? 1 : 0.78) * (1 + p * 0.16);
+      const scale = (wide ? 1 : 0.64) * (1 + p * 0.1);
       parallax.scale.setScalar(scale);
-      camera.position.z = 7.5 - p * 1.4;
+      camera.position.z = 7.5 - p * 0.9;
       sparkles.rotation.y += dt * 0.02;
 
       phaseRefs.current.forEach((phase, index) => {
@@ -451,7 +574,7 @@ export function CinematicHero() {
         </div>
 
         <div className="cine-hint" ref={hintRef} aria-hidden="true">
-          <span className="cine-hint-icon">↻</span> Drag the ring
+          <span className="cine-hint-icon">↻</span> Drag the rings
         </div>
         <div className="cine-cue" ref={cueRef} aria-hidden="true">
           Scroll
