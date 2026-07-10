@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { ConvexGeometry } from "three/examples/jsm/geometries/ConvexGeometry.js";
 
 const GOLD = 0xd4a441;
 
@@ -53,28 +52,27 @@ function buildStudioEnvironment() {
   return studio;
 }
 
-/** Round brilliant cut as a convex hull: octagonal table, 16-sided girdle, culet. */
-function buildBrilliantGeometry(girdleRadius: number) {
-  const points: THREE.Vector3[] = [];
-  for (let i = 0; i < 8; i += 1) {
-    const a = ((i + 0.5) / 8) * Math.PI * 2;
-    points.push(
-      new THREE.Vector3(
-        Math.cos(a) * girdleRadius * 0.55,
-        girdleRadius * 0.47,
-        Math.sin(a) * girdleRadius * 0.55
-      )
-    );
+/**
+ * Figure-eight (lemniscate) lying in the ring's plane, bowed slightly so its
+ * tips droop to meet the two open ends of the band.
+ */
+class InfinityCurve extends THREE.Curve<THREE.Vector3> {
+  constructor(
+    private readonly halfWidth: number,
+    private readonly droop: number,
+    private readonly centerY: number
+  ) {
+    super();
   }
-  for (let i = 0; i < 16; i += 1) {
-    const a = (i / 16) * Math.PI * 2;
-    const x = Math.cos(a) * girdleRadius;
-    const z = Math.sin(a) * girdleRadius;
-    points.push(new THREE.Vector3(x, girdleRadius * 0.06, z));
-    points.push(new THREE.Vector3(x, -girdleRadius * 0.06, z));
+
+  getPoint(t: number, target = new THREE.Vector3()) {
+    const T = t * Math.PI * 2;
+    const denom = 1 + Math.sin(T) * Math.sin(T);
+    const x = (this.halfWidth * Math.cos(T)) / denom;
+    const lobe = (this.halfWidth * Math.sin(T) * Math.cos(T)) / denom;
+    const bow = this.droop * (x / this.halfWidth) * (x / this.halfWidth);
+    return target.set(x, this.centerY + lobe - bow, 0);
   }
-  points.push(new THREE.Vector3(0, -girdleRadius * 1.24, 0));
-  return new ConvexGeometry(points);
 }
 
 function buildRing() {
@@ -86,65 +84,77 @@ function buildRing() {
     clearcoat: 0.5,
     clearcoatRoughness: 0.2
   });
+  const whiteGold = new THREE.MeshPhysicalMaterial({
+    color: 0xf3efe6,
+    metalness: 1,
+    roughness: 0.24,
+    envMapIntensity: 1.15
+  });
   const diamond = new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
     metalness: 0,
     roughness: 0,
-    transmission: 0.9,
-    thickness: 1.4,
+    transmission: 0.85,
+    thickness: 0.4,
     ior: 2.417,
     dispersion: 0.35,
-    envMapIntensity: 3,
+    envMapIntensity: 3.2,
     specularIntensity: 1,
+    flatShading: true,
     transparent: true
   });
 
   const ring = new THREE.Group();
 
-  // D-profile shank: a torus flattened front-to-back reads as a real band
-  const band = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.17, 48, 200), gold);
-  band.scale.z = 0.72;
+  // Thin open band leaving a gap at the top for the infinity link
+  const radius = 1.5;
+  const gapHalf = Math.PI / 5.4;
+  const band = new THREE.Mesh(
+    new THREE.TorusGeometry(radius, 0.082, 32, 220, Math.PI * 2 - 2 * gapHalf),
+    gold
+  );
+  band.rotation.z = Math.PI / 2 + gapHalf;
+  band.scale.z = 0.85;
   ring.add(band);
 
-  const head = new THREE.Group();
-  head.position.y = 2.2;
-
-  const stone = new THREE.Mesh(buildBrilliantGeometry(0.34), diamond);
-  head.add(stone);
-
-  // Four prongs rise from the basket and curve in over the girdle
-  for (let k = 0; k < 4; k += 1) {
-    const a = Math.PI / 4 + (k * Math.PI) / 2;
-    const cos = Math.cos(a);
-    const sin = Math.sin(a);
-    const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(cos * 0.42, -0.5, sin * 0.42),
-      new THREE.Vector3(cos * 0.45, -0.12, sin * 0.45),
-      new THREE.Vector3(cos * 0.3, 0.12, sin * 0.3)
-    ]);
-    const prong = new THREE.Mesh(new THREE.TubeGeometry(curve, 20, 0.04, 12), gold);
-    head.add(prong);
-    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.048, 16, 12), gold);
-    tip.position.set(cos * 0.3, 0.12, sin * 0.3);
-    head.add(tip);
+  // Rounded caps where the open band meets the infinity element
+  for (const side of [-1, 1]) {
+    const angle = Math.PI / 2 + side * gapHalf;
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.082, 16, 12), gold);
+    cap.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
+    cap.scale.z = 0.85;
+    ring.add(cap);
   }
 
-  const rail = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.032, 16, 48), gold);
-  rail.rotation.x = Math.PI / 2;
-  rail.position.y = -0.5;
-  head.add(rail);
+  // Infinity link bridging the gap
+  const tipX = Math.cos(Math.PI / 2 - gapHalf) * radius;
+  const tipY = Math.sin(Math.PI / 2 - gapHalf) * radius;
+  const infinity = new InfinityCurve(tipX + 0.06, 1.56 - tipY, 1.56);
+  const link = new THREE.Mesh(new THREE.TubeGeometry(infinity, 240, 0.06, 16, true), gold);
+  ring.add(link);
 
-  const lowerRail = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.028, 16, 48), gold);
-  lowerRail.rotation.x = Math.PI / 2;
-  lowerRail.position.y = -0.68;
-  head.add(lowerRail);
+  // Pavé strand: a white-gold channel with tiny diamonds along one half
+  // of the figure eight (t 0.28..0.52 runs tip-to-tip through the crossing)
+  const paveStart = 0.28;
+  const paveEnd = 0.52;
+  const channelPath = new THREE.CatmullRomCurve3(
+    Array.from({ length: 32 }, (_, i) =>
+      infinity.getPoint(paveStart + (i / 31) * (paveEnd - paveStart)).setZ(0.012)
+    )
+  );
+  const channel = new THREE.Mesh(new THREE.TubeGeometry(channelPath, 120, 0.07, 14), whiteGold);
+  ring.add(channel);
 
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.24, 0.34, 24), gold);
-  stem.position.y = -0.71;
-  head.add(stem);
+  for (let i = 0; i < 15; i += 1) {
+    const t = paveStart + ((i + 0.5) / 15) * (paveEnd - paveStart);
+    const point = infinity.getPoint(t);
+    const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.045, 0), diamond);
+    gem.position.set(point.x, point.y, 0.075);
+    gem.rotation.set(Math.random(), Math.random(), Math.random());
+    ring.add(gem);
+  }
 
-  ring.add(head);
-  ring.position.y = -0.35;
+  ring.position.y = -0.1;
   return ring;
 }
 
