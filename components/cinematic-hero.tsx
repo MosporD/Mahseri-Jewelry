@@ -3,59 +3,145 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { ConvexGeometry } from "three/examples/jsm/geometries/ConvexGeometry.js";
 
-const GOLD = 0xcfa14f;
+const GOLD = 0xd4a441;
+
+/**
+ * A dark studio with long warm softbox strips — the environment map is what
+ * gives polished gold its characteristic elongated reflections.
+ */
+function buildStudioEnvironment() {
+  const studio = new THREE.Scene();
+  studio.background = new THREE.Color(0x0c0a07);
+
+  const strip = (
+    width: number,
+    height: number,
+    intensity: number,
+    hex: number
+  ) => {
+    const material = new THREE.MeshBasicMaterial();
+    material.color.set(hex).multiplyScalar(intensity);
+    return new THREE.Mesh(new THREE.PlaneGeometry(width, height), material);
+  };
+
+  const top = strip(7, 2.6, 7, 0xfff1dd);
+  top.position.set(0, 5, 0.5);
+  top.rotation.x = Math.PI / 2;
+  studio.add(top);
+
+  const left = strip(1.1, 9, 5.5, 0xffffff);
+  left.position.set(-5, 1, 1);
+  left.rotation.y = Math.PI / 2;
+  studio.add(left);
+
+  const right = strip(1.7, 9, 3.5, 0xffe2b4);
+  right.position.set(5, 0, -1);
+  right.rotation.y = -Math.PI / 2;
+  studio.add(right);
+
+  const back = strip(9, 0.9, 2.6, 0xffd9a6);
+  back.position.set(0, 3, -6);
+  studio.add(back);
+
+  const front = strip(7, 1.1, 1.3, 0xffffff);
+  front.position.set(0, -2.2, 6);
+  front.rotation.y = Math.PI;
+  studio.add(front);
+
+  return studio;
+}
+
+/** Round brilliant cut as a convex hull: octagonal table, 16-sided girdle, culet. */
+function buildBrilliantGeometry(girdleRadius: number) {
+  const points: THREE.Vector3[] = [];
+  for (let i = 0; i < 8; i += 1) {
+    const a = ((i + 0.5) / 8) * Math.PI * 2;
+    points.push(
+      new THREE.Vector3(
+        Math.cos(a) * girdleRadius * 0.55,
+        girdleRadius * 0.47,
+        Math.sin(a) * girdleRadius * 0.55
+      )
+    );
+  }
+  for (let i = 0; i < 16; i += 1) {
+    const a = (i / 16) * Math.PI * 2;
+    const x = Math.cos(a) * girdleRadius;
+    const z = Math.sin(a) * girdleRadius;
+    points.push(new THREE.Vector3(x, girdleRadius * 0.06, z));
+    points.push(new THREE.Vector3(x, -girdleRadius * 0.06, z));
+  }
+  points.push(new THREE.Vector3(0, -girdleRadius * 1.24, 0));
+  return new ConvexGeometry(points);
+}
 
 function buildRing() {
   const gold = new THREE.MeshPhysicalMaterial({
     color: GOLD,
     metalness: 1,
-    roughness: 0.16,
-    envMapIntensity: 1.3,
-    clearcoat: 0.35,
-    clearcoatRoughness: 0.25
+    roughness: 0.12,
+    envMapIntensity: 1.35,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2
   });
   const diamond = new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
     metalness: 0,
-    roughness: 0.02,
-    transmission: 0.92,
-    thickness: 0.9,
+    roughness: 0,
+    transmission: 0.9,
+    thickness: 1.4,
     ior: 2.417,
-    envMapIntensity: 2.4,
+    dispersion: 0.35,
+    envMapIntensity: 3,
     specularIntensity: 1,
-    flatShading: true,
     transparent: true
   });
 
   const ring = new THREE.Group();
 
-  const band = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.2, 64, 160), gold);
+  // D-profile shank: a torus flattened front-to-back reads as a real band
+  const band = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.17, 48, 200), gold);
+  band.scale.z = 0.72;
   ring.add(band);
 
   const head = new THREE.Group();
-  head.position.y = 1.5;
+  head.position.y = 2.2;
 
-  const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.2, 0.3, 24), gold);
-  seat.position.y = 0.28;
-  head.add(seat);
+  const stone = new THREE.Mesh(buildBrilliantGeometry(0.34), diamond);
+  head.add(stone);
 
-  const pavilion = new THREE.Mesh(new THREE.ConeGeometry(0.42, 0.5, 8, 1), diamond);
-  pavilion.rotation.x = Math.PI;
-  pavilion.position.y = 0.62;
-  head.add(pavilion);
-
-  const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.42, 0.18, 8, 1), diamond);
-  crown.position.y = 0.96;
-  head.add(crown);
-
+  // Four prongs rise from the basket and curve in over the girdle
   for (let k = 0; k < 4; k += 1) {
-    const angle = Math.PI / 4 + (k * Math.PI) / 2;
-    const prong = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.5, 12), gold);
-    prong.position.set(Math.cos(angle) * 0.37, 0.72, Math.sin(angle) * 0.37);
+    const a = Math.PI / 4 + (k * Math.PI) / 2;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(cos * 0.42, -0.5, sin * 0.42),
+      new THREE.Vector3(cos * 0.45, -0.12, sin * 0.45),
+      new THREE.Vector3(cos * 0.3, 0.12, sin * 0.3)
+    ]);
+    const prong = new THREE.Mesh(new THREE.TubeGeometry(curve, 20, 0.04, 12), gold);
     head.add(prong);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.048, 16, 12), gold);
+    tip.position.set(cos * 0.3, 0.12, sin * 0.3);
+    head.add(tip);
   }
+
+  const rail = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.032, 16, 48), gold);
+  rail.rotation.x = Math.PI / 2;
+  rail.position.y = -0.5;
+  head.add(rail);
+
+  const lowerRail = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.028, 16, 48), gold);
+  lowerRail.rotation.x = Math.PI / 2;
+  lowerRail.position.y = -0.68;
+  head.add(lowerRail);
+
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.24, 0.34, 24), gold);
+  stem.position.y = -0.71;
+  head.add(stem);
 
   ring.add(head);
   ring.position.y = -0.35;
@@ -122,7 +208,7 @@ export function CinematicHero() {
 
     const scene = new THREE.Scene();
     const pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = pmrem.fromScene(buildStudioEnvironment(), 0.03).texture;
 
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 60);
     camera.position.set(0, 0, 7.5);
