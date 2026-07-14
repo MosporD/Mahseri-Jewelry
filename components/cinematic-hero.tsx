@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { ConvexGeometry } from "three/examples/jsm/geometries/ConvexGeometry.js";
 
 const GOLD = 0xd4a441;
 
@@ -52,6 +53,102 @@ function buildStudioEnvironment() {
   return studio;
 }
 
+/** Round brilliant cut as a convex hull: octagonal table, 16-sided girdle, culet. */
+function buildBrilliantGeometry(girdleRadius: number) {
+  const points: THREE.Vector3[] = [];
+  for (let i = 0; i < 8; i += 1) {
+    const a = ((i + 0.5) / 8) * Math.PI * 2;
+    points.push(
+      new THREE.Vector3(
+        Math.cos(a) * girdleRadius * 0.55,
+        girdleRadius * 0.47,
+        Math.sin(a) * girdleRadius * 0.55
+      )
+    );
+  }
+  for (let i = 0; i < 16; i += 1) {
+    const a = (i / 16) * Math.PI * 2;
+    const x = Math.cos(a) * girdleRadius;
+    const z = Math.sin(a) * girdleRadius;
+    points.push(new THREE.Vector3(x, girdleRadius * 0.06, z));
+    points.push(new THREE.Vector3(x, -girdleRadius * 0.06, z));
+  }
+  points.push(new THREE.Vector3(0, -girdleRadius * 1.24, 0));
+  return new ConvexGeometry(points);
+}
+
+/** Classic four-prong diamond solitaire. */
+function buildSolitaireRing() {
+  const gold = new THREE.MeshPhysicalMaterial({
+    color: GOLD,
+    metalness: 1,
+    roughness: 0.12,
+    envMapIntensity: 1.35,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2
+  });
+  const diamond = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    metalness: 0,
+    roughness: 0,
+    transmission: 0.9,
+    thickness: 1.4,
+    ior: 2.417,
+    dispersion: 0.35,
+    envMapIntensity: 3,
+    specularIntensity: 1,
+    transparent: true
+  });
+
+  const ring = new THREE.Group();
+
+  // D-profile shank: a torus flattened front-to-back reads as a real band
+  const band = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.17, 48, 200), gold);
+  band.scale.z = 0.72;
+  ring.add(band);
+
+  const head = new THREE.Group();
+  head.position.y = 2.2;
+
+  const stone = new THREE.Mesh(buildBrilliantGeometry(0.34), diamond);
+  head.add(stone);
+
+  // Four prongs rise from the basket and curve in over the girdle
+  for (let k = 0; k < 4; k += 1) {
+    const a = Math.PI / 4 + (k * Math.PI) / 2;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(cos * 0.42, -0.5, sin * 0.42),
+      new THREE.Vector3(cos * 0.45, -0.12, sin * 0.45),
+      new THREE.Vector3(cos * 0.3, 0.12, sin * 0.3)
+    ]);
+    const prong = new THREE.Mesh(new THREE.TubeGeometry(curve, 20, 0.04, 12), gold);
+    head.add(prong);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.048, 16, 12), gold);
+    tip.position.set(cos * 0.3, 0.12, sin * 0.3);
+    head.add(tip);
+  }
+
+  const rail = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.032, 16, 48), gold);
+  rail.rotation.x = Math.PI / 2;
+  rail.position.y = -0.5;
+  head.add(rail);
+
+  const lowerRail = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.028, 16, 48), gold);
+  lowerRail.rotation.x = Math.PI / 2;
+  lowerRail.position.y = -0.68;
+  head.add(lowerRail);
+
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.24, 0.34, 24), gold);
+  stem.position.y = -0.71;
+  head.add(stem);
+
+  ring.add(head);
+  ring.position.y = -0.35;
+  return ring;
+}
+
 /**
  * Figure-eight (lemniscate) lying in the ring's plane, bowed slightly so its
  * tips droop to meet the two open ends of the band.
@@ -75,7 +172,8 @@ class InfinityCurve extends THREE.Curve<THREE.Vector3> {
   }
 }
 
-function buildRing() {
+/** The Mahseri infinity ring: open band bridged by a pavé figure eight. */
+function buildInfinityRing() {
   const gold = new THREE.MeshPhysicalMaterial({
     color: GOLD,
     metalness: 1,
@@ -156,6 +254,17 @@ function buildRing() {
 
   ring.position.y = -0.1;
   return ring;
+}
+
+/**
+ * Each visit randomly features one of the two signature rings.
+ * `?ring=solitaire` / `?ring=infinity` forces a specific one for previewing.
+ */
+function buildRing() {
+  let choice = Math.random() < 0.5 ? "solitaire" : "infinity";
+  const forced = new URLSearchParams(window.location.search).get("ring");
+  if (forced === "solitaire" || forced === "infinity") choice = forced;
+  return choice === "solitaire" ? buildSolitaireRing() : buildInfinityRing();
 }
 
 function buildSparkles() {
